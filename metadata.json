@@ -1,0 +1,6 @@
+{
+  "name": "AUTORA Workshop",
+  "description": "Sistem Manajemen Bengkel & Portal Servis Pelanggan berbasis RBAC (Admin, Operator, Pelanggan).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,62 @@
+:root {
+  /* 60% Neutral Canvas & Surfaces */
+  --bg: #f6f4f0;
+  --surface: #ffffff;
+  --surface-muted: #f1ede6;
+  --surface-hover: #faf8f5;
+
+  /* Typography & Ink */
+  --ink: #1c1917;
+  --ink-secondary: #44403c;
+  --muted: #6e675f;
+  --border: #e5dfd6;
+  --border-strong: #d4cbc0;
+
+  /* Sidebar / Dark Structural Chrome */
+  --chrome-bg: #1c1917;
+  --chrome-surface: #272320;
+  --chrome-border: #3a342f;
+  --chrome-text: #f5f2ed;
+  --chrome-muted: #b8afa6;
+
+  /* 10% Accent & Semantic State */
+  --accent: #a16207;
+  --accent-hover: #854d0e;
+  --amber: #efb84f;
+  --amber-soft: #fef6e4;
+
+  --success: #166534;
+  --success-bg: #edf7f0;
+  --success-border: #b9dfc6;
+
+  --info: #1e40af;
+  --info-bg: #eff4ff;
+  --info-border: #c3d5fa;
+
+  --warn: #92400e;
+  --warn-bg: #fef7e6;
+  --warn-border: #f3d79b;
+
+  --danger: #991b1b;
+  --danger-bg: #fef0ef;
+  --danger-border: #f3c4c0;
+
+  /* Typography Families */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  /* Spatial & Radius Scale */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+
+  --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.05);
+  --shadow-md: 0 8px 24px rgba(28, 25, 23, 0.08);
+  --shadow-lg: 0 20px 50px rgba(28, 25, 23, 0.16);
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}

@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1c1917" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="AUTORA Workshop" />
+  <title>AUTORA Workshop — Sistem Manajemen Bengkel</title>
+  <meta name="description" content="Sistem Manajemen Bengkel & Portal Servis Pelanggan berbasis RBAC (Admin, Operator, Pelanggan)." />
+  <meta property="og:title" content="AUTORA Workshop" />
+  <meta property="og:description" content="Sistem Manajemen Bengkel & Portal Servis Pelanggan berbasis RBAC (Admin, Operator, Pelanggan)." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Halaman Autentikasi & Setup Awal -->
+  <section class="auth-screen" id="authScreen" aria-label="Autentikasi Pengguna">
+    <div class="auth-layout">
+      <div class="auth-intro">
+        <div class="auth-brand">
+          <div class="auth-logo" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 48 48" fill="none">
+              <path d="M8 38 20.5 8h7L40 38h-8l-3-8H18l-3 8H8Z" fill="#efb84f" />
+              <path d="m20.5 24 3.5-9 3.5 9h-7Z" fill="#1c1917" />
+              <path d="M5 42h38" stroke="#f7f5f2" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div>
+            <span class="auth-wordmark">AUTORA</span>
+            <p class="auth-subline">Sistem Manajemen Bengkel</p>
+          </div>
+        </div>
+        <h1 class="auth-hero-title">Kendali Penuh Operasional Bengkel &amp; Layanan Pelanggan</h1>
+        <p class="auth-hero-copy">Kelola antrean servis, penugasan mekanik, rincian sparepart, pembukuan kasir, hingga portal booking pelanggan dalam satu sistem terpadu dengan pemisahan hak akses.</p>
+        <dl class="auth-highlights">
+          <div class="auth-highlight-item">
+            <dt>Administrator</dt>
+            <dd>Akses penuh analitik pendapatan, armada kendaraan, tim mekanik, laporan keuangan, dan manajemen akun.</dd>
+          </div>
+          <div class="auth-highlight-item">
+            <dt>Operator Front-Desk</dt>
+            <dd>Fokus penerimaan antrean servis, pembaruan progres kerja, rincian biaya, pembayaran, dan data pelanggan.</dd>
+          </div>
+          <div class="auth-highlight-item">
+            <dt>Pelanggan</dt>
+            <dd>Booking jadwal servis daring, pantau status pengerjaan kendaraan secara langsung, dan cetak nota tagihan.</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-tabs" id="authTabs" role="tablist" aria-label="Mode Autentikasi">
+          <button type="button" role="tab" class="active" id="tabLogin" data-auth-tab="login" aria-selected="true">Masuk Akun</button>
+          <button type="button" role="tab" id="tabRegister" data-auth-tab="register" aria-selected="false">Daftar Pelanggan</button>
+        </div>
+
+        <div class="setup-banner" id="firstRunBanner" hidden>
+          <div class="setup-banner-head">
+            <strong>Aktivasi Awal Sistem</strong>
+          </div>
+          <p>Belum ada akun Administrator terdaftar. Buat akun Administrator utama Anda untuk mengamankan akses bengkel sebelum mulai beroperasi.</p>
+          <button type="button" class="btn accent btn-full" id="openFirstRunBtn">Buat Akun Administrator Utama</button>
+        </div>
+
+        <h2 id="authTitle">Masuk ke Sistem AUTORA</h2>
+        <p class="auth-desc" id="authDesc">Gunakan akun sesuai hak akses Anda (Admin, Operator, atau Pelanggan).</p>
+
+        <form id="authForm" novalidate>
+          <div class="field" id="regNameField" hidden>
+            <label for="regName">Nama Lengkap</label>
+            <input id="regName" name="nama" type="text" autocomplete="name" placeholder="Contoh: Raka Wijaya" />
+          </div>
+          <div class="field" id="regPhoneField" hidden>
+            <label for="regPhone">Nomor Telepon / WhatsApp</label>
+            <input id="regPhone" name="telepon" type="tel" autocomplete="tel" placeholder="Contoh: 0812-3456-7890" />
+          </div>
+          <div class="field">
+            <label for="authUser">Username</label>
+            <input id="authUser" name="username" type="text" autocomplete="username" required placeholder="Masukkan username" />
+          </div>
+          <div class="field">
+            <label for="authPass">Password</label>
+            <input id="authPass" name="password" type="password" autocomplete="current-password" required placeholder="Masukkan password" />
+          </div>
+          <div class="field" id="confirmField" hidden>
+            <label for="authConfirm">Konfirmasi Password</label>
+            <input id="authConfirm" name="confirmPassword" type="password" autocomplete="new-password" placeholder="Ulangi password" />
+          </div>
+          <button class="btn primary btn-full auth-submit" id="authSubmit" type="submit">Masuk ke AUTORA</button>
+          <div class="auth-error" id="authError" role="alert" aria-live="polite" hidden></div>
+        </form>
+
+        <div class="demo-box" id="demoBox">
+          <div class="demo-box-title">Pratinjau Cepat Portal Pelanggan</div>
+          <p class="demo-box-desc">Akun staf (Admin &amp; Operator) menggunakan kredensial pribadi. Untuk mencoba fitur pelanggan, pilih salah satu profil sampel berikut:</p>
+          <div class="demo-accounts" id="demoCustomerList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shell Aplikasi Utama -->
+  <div class="app" id="appShell" hidden>
+    <!-- Mobile Top App Bar (<768px) -->
+    <header class="mobile-topbar" id="mobileTopbar">
+      <div class="mobile-topbar-brand">
+        <div class="brand-mark-sm" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 48 48" fill="none">
+            <path d="M8 38 20.5 8h7L40 38h-8l-3-8H18l-3 8H8Z" fill="#1c1917" />
+            <path d="m20.5 24 3.5-9 3.5 9h-7Z" fill="#efb84f" />
+          </svg>
+        </div>
+        <div class="mobile-topbar-text">
+          <span class="mobile-topbar-title" id="mobilePageTitle">AUTORA</span>
+          <span class="mobile-topbar-sub" id="mobileUserSub">Memuat akun</span>
+        </div>
+      </div>
+      <div class="mobile-topbar-actions">
+        <button type="button" class="mobile-action-btn" id="mobileResetBtn" hidden aria-label="Reset Data Demo" title="Reset Data Demo">Reset</button>
+        <button type="button" class="mobile-action-btn danger" id="mobileLogoutBtn">Keluar</button>
+      </div>
+    </header>
+
+    <!-- Desktop Sidebar (>=768px) -->
+    <aside class="sidebar" aria-label="Navigasi Utama">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 48 48" fill="none">
+            <path d="M8 38 20.5 8h7L40 38h-8l-3-8H18l-3 8H8Z" fill="#1c1917" />
+            <path d="m20.5 24 3.5-9 3.5 9h-7Z" fill="#efb84f" />
+            <path d="M5 42h38" stroke="#1c1917" stroke-width="2.5" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div class="brand-text">
+          <strong>AUTORA</strong>
+          <span>Workshop System</span>
+        </div>
+      </div>
+
+      <div class="role-card" id="sidebarUserCard"></div>
+      <nav class="nav" id="nav" aria-label="Menu Modul"></nav>
+      <div class="side-note" id="sideNote"></div>
+    </aside>
+
+    <!-- Area Konten Utama -->
+    <main class="main" id="mainContent">
+      <header class="topbar">
+        <div class="topbar-title-group">
+          <span class="topbar-breadcrumb" id="pageEyebrow">AUTORA Workshop</span>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="top-actions">
+          <span class="signed-in-meta" id="signedInUser"></span>
+          <button type="button" class="btn secondary" id="resetBtn" hidden>Reset Data Demo</button>
+          <button type="button" class="btn danger" id="logoutBtn">Keluar</button>
+        </div>
+      </header>
+
+      <div class="role-notice" id="roleNotice"></div>
+
+      <!-- ADMIN: Dashboard -->
+      <section class="view" id="view-dashboard" aria-labelledby="pageTitle">
+        <div class="stats" id="stats"></div>
+        <div class="grid2">
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Pendapatan Bulanan</h2>
+                <span class="panel-subtitle">Akumulasi pembayaran masuk 6 bulan terakhir</span>
+              </div>
+            </div>
+            <div class="chart-wrap">
+              <canvas class="chart" id="revenueChart" aria-label="Grafik pendapatan bulanan"></canvas>
+              <div class="chart-tooltip" id="chartTooltip" hidden></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Ringkasan Operasional</h2>
+                <span class="panel-subtitle">Distribusi antrean &amp; kapasitas aktif</span>
+              </div>
+            </div>
+            <div id="opsSummary"></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Servis Terbaru</h2>
+              <span class="panel-subtitle">Transaksi dan antrean terbaru di bengkel</span>
+            </div>
+            <button type="button" class="btn small accent" data-nav-target="servis">Kelola Semua Servis</button>
+          </div>
+          <div class="table-wrap" id="recentTable"></div>
+        </div>
+      </section>
+
+      <!-- USER BIASA: Portal Booking & Pantau -->
+      <section class="view" id="view-portal">
+        <div class="stats" id="userStats"></div>
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Kendaraan &amp; Booking Servis</h2>
+              <span class="panel-subtitle">Daftarkan unit kendaraan Anda, ajukan jadwal servis, dan pantau progres pengerjaan.</span>
+            </div>
+            <div class="toolbar-left">
+              <button type="button" class="btn secondary" id="btnUserAddVehicle">Tambah Kendaraan</button>
+              <button type="button" class="btn accent" id="btnUserBookService">Booking Servis Baru</button>
+            </div>
+          </div>
+          <div id="userVehiclesList"></div>
+          <div class="table-wrap mt-md" id="userServicesTable"></div>
+        </div>
+      </section>
+
+      <!-- USER BIASA: Tagihan Saya -->
+      <section class="view" id="view-tagihan">
+        <div class="stats" id="userBillStats"></div>
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Daftar Tagihan &amp; Nota Servis</h2>
+              <span class="panel-subtitle">Rincian biaya jasa, sparepart, status pelunasan, dan cetak bukti nota resmi.</span>
+            </div>
+          </div>
+          <div class="table-wrap" id="userBillsTable"></div>
+        </div>
+      </section>
+
+      <!-- ADMIN & OPERATOR: Antrean & Servis -->
+      <section class="view" id="view-servis">
+        <div class="stats" id="operatorQueueStats" hidden></div>
+        <div class="toolbar">
+          <div class="toolbar-heading">
+            <h2>Antrean &amp; Manajemen Servis</h2>
+            <p class="muted">Kelola antrean masuk, tugaskan mekanik, rincian biaya, dan pembayaran pelanggan.</p>
+          </div>
+          <div class="toolbar-controls">
+            <select class="filter-select" id="filterStatusServis" aria-label="Filter status antrean">
+              <option value="">Semua Status</option>
+              <option value="Menunggu">Menunggu</option>
+              <option value="Dikerjakan">Dikerjakan</option>
+              <option value="Selesai">Selesai</option>
+              <option value="Dibatalkan">Dibatalkan</option>
+            </select>
+            <input class="search" id="searchServis" type="search" placeholder="Cari plat, keluhan, pelanggan…" aria-label="Cari servis" />
+            <button type="button" class="btn accent" data-open-form="servis">Tambah Antrean</button>
+          </div>
+        </div>
+        <div class="panel"><div class="table-wrap" id="tableServis"></div></div>
+      </section>
+
+      <!-- ADMIN & OPERATOR: Pelanggan -->
+      <section class="view" id="view-pelanggan">
+        <div class="toolbar">
+          <div class="toolbar-heading">
+            <h2>Data Pelanggan</h2>
+            <p class="muted">Kelola identitas pelanggan dan tautan unit kendaraan mereka.</p>
+          </div>
+          <div class="toolbar-controls">
+            <input class="search" id="searchPelanggan" type="search" placeholder="Cari nama, telepon, alamat…" aria-label="Cari pelanggan" />
+            <button type="button" class="btn accent" data-open-form="pelanggan">Tambah Pelanggan</button>
+          </div>
+        </div>
+        <div class="panel"><div class="table-wrap" id="tablePelanggan"></div></div>
+      </section>
+
+      <!-- ADMIN: Kendaraan -->
+      <section class="view" id="view-kendaraan">
+        <div class="toolbar">
+          <div class="toolbar-heading">
+            <h2>Data Kendaraan</h2>
+            <p class="muted">Daftar plat nomor, spesifikasi kendaraan, pemilik, dan riwayat servis.</p>
+          </div>
+          <div class="toolbar-controls">
+            <input class="search" id="searchKendaraan" type="search" placeholder="Cari plat, merek, pemilik…" aria-label="Cari kendaraan" />
+            <button type="button" class="btn accent" data-open-form="kendaraan">Tambah Kendaraan</button>
+          </div>
+        </div>
+        <div class="panel"><div class="table-wrap" id="tableKendaraan"></div></div>
+      </section>
+
+      <!-- ADMIN: Mekanik -->
+      <section class="view" id="view-mekanik">
+        <div class="toolbar">
+          <div class="toolbar-heading">
+            <h2>Tim Mekanik</h2>
+            <p class="muted">Kelola teknisi bengkel, spesialisasi keahlian, dan status keaktifan.</p>
+          </div>
+          <div class="toolbar-controls">
+            <input class="search" id="searchMekanik" type="search" placeholder="Cari nama atau keahlian…" aria-label="Cari mekanik" />
+            <button type="button" class="btn accent" data-open-form="mekanik">Tambah Mekanik</button>
+          </div>
+        </div>
+        <div class="panel"><div class="table-wrap" id="tableMekanik"></div></div>
+      </section>
+
+      <!-- ADMIN: Laporan Keuangan & Backup -->
+      <section class="view" id="view-laporan">
+        <div class="toolbar">
+          <div class="toolbar-heading">
+            <h2>Laporan Keuangan &amp; Cadangan Data</h2>
+            <p class="muted">Rekap pendapatan bengkel, piutang belum lunas, ekspor CSV, dan pencadangan JSON.</p>
+          </div>
+          <div class="toolbar-controls">
+            <button type="button" class="btn secondary" id="backupJsonBtn">Unduh Backup JSON</button>
+            <label class="btn secondary file-btn" for="restoreJsonInput">Pulihkan JSON</label>
+            <input type="file" id="restoreJsonInput" accept="application/json,.json" hidden />
+            <button type="button" class="btn accent" id="exportBtn">Ekspor CSV</button>
+          </div>
+        </div>
+        <div class="stats" id="reportStats"></div>
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Rekap Transaksi Servis &amp; Pembayaran</h2>
+              <span class="panel-subtitle" id="reportPeriod"></span>
+            </div>
+          </div>
+          <div class="table-wrap" id="reportTable"></div>
+        </div>
+        <p class="footer-note">Pendapatan dihitung berdasarkan nominal pembayaran yang telah diterima, tidak termasuk servis yang dibatalkan.</p>
+      </section>
+
+      <!-- ADMIN: Manajemen User RBAC -->
+      <section class="view" id="view-pengguna">
+        <div class="toolbar">
+          <div class="toolbar-heading">
+            <h2>Manajemen Akun &amp; Hak Akses</h2>
+            <p class="muted">Kelola akun Administrator, Operator Front-Desk, dan Pelanggan.</p>
+          </div>
+          <div class="toolbar-controls">
+            <input class="search" id="searchPengguna" type="search" placeholder="Cari username, nama, peran…" aria-label="Cari pengguna" />
+            <button type="button" class="btn accent" id="btnAddAccount">Buat Akun Baru</button>
+          </div>
+        </div>
+        <div class="panel"><div class="table-wrap" id="tablePengguna"></div></div>
+      </section>
+    </main>
+
+    <!-- Mobile Bottom Tab Bar (<768px) -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Navigasi Mobile"></nav>
+  </div>
+
+  <!-- Modal / Mobile Bottom-Sheet -->
+  <div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+    <div class="modal" id="modalContainer">
+      <div class="modal-handle" aria-hidden="true"></div>
+      <div class="modal-head">
+        <h2 id="modalTitle">Dialog</h2>
+        <button type="button" class="modal-close" id="modalCloseBtn" aria-label="Tutup dialog">&times;</button>
+      </div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Toast Live Region -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
