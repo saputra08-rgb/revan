@@ -44,6 +44,12 @@ export function buildSeedData({ preserveStaffAccounts = [] } = {}) {
 
   return {
     schemaVersion: 4,
+    settings: {
+      namaBengkel: 'BENGKEL AUTORA',
+      alamatBengkel: 'Jl. Teuku Umar No. 45, Banda Aceh',
+      teleponBengkel: '0811-6800-990',
+      catatanNota: 'Terima kasih telah mempercayakan servis kendaraan Anda kepada kami.',
+    },
     users,
     pelanggan: [
       { id: 'p1', nama: 'Andi Pratama', telepon: '0812-0000-0101', alamat: 'Jl. Melati No. 12, Banda Aceh' },
@@ -109,8 +115,15 @@ function normalizeDatabase(raw) {
   if (!Array.isArray(raw.users) || !Array.isArray(raw.pelanggan) || !Array.isArray(raw.kendaraan) || !Array.isArray(raw.mekanik) || !Array.isArray(raw.servis)) {
     return null;
   }
+  const defaultSettings = {
+    namaBengkel: 'BENGKEL AUTORA',
+    alamatBengkel: 'Jl. Teuku Umar No. 45, Banda Aceh',
+    teleponBengkel: '0811-6800-990',
+    catatanNota: 'Terima kasih telah mempercayakan servis kendaraan Anda kepada kami.',
+  };
   return {
     schemaVersion: 4,
+    settings: { ...defaultSettings, ...(raw.settings && typeof raw.settings === 'object' ? raw.settings : {}) },
     users: raw.users,
     pelanggan: raw.pelanggan,
     kendaraan: raw.kendaraan,

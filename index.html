@@ -13,8 +13,10 @@
   <meta property="og:title" content="AUTORA Workshop" />
   <meta property="og:description" content="Sistem Manajemen Bengkel & Portal Servis Pelanggan berbasis RBAC (Admin, Operator, Pelanggan)." />
   <meta property="og:type" content="website" />
+  <meta property="og:image" content="/pwa-512x512.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -124,6 +126,8 @@
         </div>
       </div>
       <div class="mobile-topbar-actions">
+        <button type="button" class="mobile-action-btn" id="mobileInstallBtn" hidden aria-label="Pasang Aplikasi">Pasang</button>
+        <button type="button" class="mobile-action-btn" id="mobileProfileBtn" aria-label="Profil Akun">Profil</button>
         <button type="button" class="mobile-action-btn" id="mobileResetBtn" hidden aria-label="Reset Data Demo" title="Reset Data Demo">Reset</button>
         <button type="button" class="mobile-action-btn danger" id="mobileLogoutBtn">Keluar</button>
       </div>
@@ -159,6 +163,8 @@
         </div>
         <div class="top-actions">
           <span class="signed-in-meta" id="signedInUser"></span>
+          <button type="button" class="btn secondary" id="pwaInstallBtn" hidden>Pasang Aplikasi</button>
+          <button type="button" class="btn secondary" id="profileBtn">Profil</button>
           <button type="button" class="btn secondary" id="resetBtn" hidden>Reset Data Demo</button>
           <button type="button" class="btn danger" id="logoutBtn">Keluar</button>
         </div>
@@ -313,6 +319,7 @@
             <p class="muted">Rekap pendapatan bengkel, piutang belum lunas, ekspor CSV, dan pencadangan JSON.</p>
           </div>
           <div class="toolbar-controls">
+            <button type="button" class="btn secondary" id="workshopSettingsBtn">Identitas Bengkel</button>
             <button type="button" class="btn secondary" id="backupJsonBtn">Unduh Backup JSON</button>
             <label class="btn secondary file-btn" for="restoreJsonInput">Pulihkan JSON</label>
             <input type="file" id="restoreJsonInput" accept="application/json,.json" hidden />
@@ -362,6 +369,11 @@
       </div>
       <div id="modalBody"></div>
     </div>
+  </div>
+
+  <!-- Offline Status Banner -->
+  <div class="offline-banner" id="offlineBanner" hidden role="status" aria-live="polite">
+    Mode Offline — Menampilkan &amp; menyimpan data secara lokal di perangkat.
   </div>
 
   <!-- Toast Live Region -->

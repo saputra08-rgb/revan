@@ -1,0 +1,1833 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AUTORA — Sistem Manajemen Bengkel</title>
+<style>
+:root{
+  --bg:#f6f1e9;
+  --paper:#fffdfa;
+  --ink:#211f1c;
+  --muted:#777168;
+  --line:#e9e0d4;
+  --brown:#9a6b42;
+  --brown2:#c99b6b;
+  --amber:#efb84f;
+  --green:#2f805b;
+  --blue:#2f639a;
+  --red:#b84b42;
+  --shadow:0 12px 30px #4d382014;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;transition:.15s ease}
+.app{display:none;grid-template-columns:255px 1fr;min-height:100vh}
+.app.unlocked{display:grid}
+
+/* Sidebar */
+.sidebar{background:#28231f;color:#fff;padding:24px 16px;display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;align-items:center;gap:12px;padding:4px 8px}
+.brand-mark{width:42px;height:42px;border-radius:14px;background:var(--amber);display:grid;place-items:center;color:#28231f;font-size:24px;flex-shrink:0}
+.brand b{font-size:18px;letter-spacing:.04em}
+.brand small{display:block;color:#c7bdb2;font-size:10px;letter-spacing:.1em}
+.role-card{background:#352e27;border:1px solid #483e35;border-radius:14px;padding:12px;display:flex;align-items:center;gap:10px}
+.role-badge{padding:3px 8px;border-radius:99px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;display:inline-block}
+.role-badge.admin{background:#efb84f;color:#28231f}
+.role-badge.operator{background:#93c5fd;color:#1e3a8a}
+.role-badge.user{background:#86efac;color:#14532d}
+.nav{display:grid;gap:5px}
+.nav button{border:0;background:transparent;color:#d8d0c8;text-align:left;padding:11px 12px;border-radius:12px;display:flex;gap:12px;align-items:center;font-weight:500}
+.nav button:hover,.nav button.active{background:#463b31;color:#fff}
+.nav button.active{font-weight:700;box-shadow:inset 3px 0 0 var(--amber)}
+.nav .ico{width:22px;text-align:center;font-size:17px}
+.side-note{margin-top:auto;padding:14px;background:#39312a;border-radius:14px;color:#d6c9bb;font-size:12px;line-height:1.45}
+
+/* Main Area */
+.main{min-width:0;padding:28px clamp(16px,3vw,40px) 48px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--brown);font-weight:800}
+.topbar h1{font-size:clamp(24px,3vw,32px);margin:3px 0 0;letter-spacing:-.04em}
+.top-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.avatar{width:38px;height:38px;border-radius:50%;background:#e9d4b9;display:grid;place-items:center;font-size:18px;border:2px solid #fff}
+
+/* Buttons */
+.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--ink);color:#fff;font-weight:700;display:inline-flex;align-items:center;gap:6px;justify-content:center}
+.btn:hover{filter:brightness(1.1)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.secondary{background:#eee5d9;color:#342b23}
+.btn.accent{background:var(--brown);color:white}
+.btn.success{background:var(--green);color:white}
+.btn.danger{background:#f8e4e1;color:#9b302a}
+.btn.small{padding:6px 10px;font-size:12px;border-radius:8px}
+
+/* Notice & Views */
+.notice{background:#fff4d9;border:1px solid #f1d99d;padding:11px 14px;border-radius:12px;color:#76551e;font-size:13px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.view{display:none}
+.view.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* Cards & Stats */
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:18px}
+.stat,.panel{background:var(--paper);border:1px solid var(--line);border-radius:17px;box-shadow:var(--shadow)}
+.stat{padding:17px;position:relative;overflow:hidden}
+.stat .label{color:var(--muted);font-size:12px;font-weight:700}
+.stat .value{font-size:26px;font-weight:850;letter-spacing:-.04em;margin:8px 0 0}
+.stat .symbol{position:absolute;right:15px;top:14px;font-size:22px;background:#f4eadc;width:42px;height:42px;display:grid;place-items:center;border-radius:13px}
+.stat .hint{color:var(--muted);font-size:11px;margin-top:4px}
+.grid2{display:grid;grid-template-columns:1.25fr .75fr;gap:16px}
+.panel{padding:18px;margin-bottom:16px;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:15px;flex-wrap:wrap}
+.panel h2{font-size:16px;margin:0}
+.muted{color:var(--muted)}
+.chart{height:220px;width:100%;display:block}
+.legend{font-size:12px;color:var(--muted)}
+
+/* Tables & Pills */
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;white-space:nowrap;font-size:13px}
+th{text-align:left;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em;padding:10px;border-bottom:1px solid var(--line)}
+td{padding:12px 10px;border-bottom:1px solid #f0eae2;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tr:hover td{background:#fcf9f4}
+.pill{display:inline-flex;align-items:center;padding:4px 9px;border-radius:99px;font-size:11px;font-weight:800;background:#eee8df;color:#66594b}
+.pill.wait{background:#fff0ce;color:#8a6116}
+.pill.work{background:#e4edff;color:#365b9b}
+.pill.done,.pill.paid{background:#dff3e7;color:#26724c}
+.pill.cancel{background:#fbe7e4;color:#9b302a}
+
+/* Toolbars & Forms */
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.search{min-width:220px;max-width:320px;width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:white}
+.filter-select{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);font-size:13px}
+.toolbar-left{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field{display:grid;gap:5px}
+.field.full{grid-column:1/-1}
+.field label{font-size:12px;font-weight:800;color:#62594f}
+.field input,.field select,.field textarea{width:100%;padding:10px 11px;border:1px solid #ded5c9;border-radius:9px;background:#fff;color:var(--ink)}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid #c99b6b55;border-color:var(--brown)}
+.field textarea{min-height:75px;resize:vertical}
+
+/* Modals */
+.modal-backdrop{position:fixed;inset:0;background:#1b1714a6;display:none;align-items:center;justify-content:center;padding:16px;z-index:20;backdrop-filter:blur(2px)}
+.modal-backdrop.show{display:flex}
+.modal{width:min(740px,100%);max-height:90vh;overflow:auto;background:var(--paper);border-radius:18px;padding:22px;box-shadow:0 25px 70px #0004}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.modal-head h2{margin:0;font-size:19px}
+.x{border:0;background:#eee5d9;border-radius:9px;width:34px;height:34px;font-size:20px;display:grid;place-items:center}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;flex-wrap:wrap}
+.empty{text-align:center;padding:32px 16px;color:var(--muted)}
+.mini-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mini{padding:12px;border-radius:12px;background:#f5eee5}
+.mini b{display:block;font-size:17px;margin-top:2px}
+.mini span{font-size:11px;color:var(--muted)}
+.row-actions{display:flex;gap:6px;flex-wrap:wrap}
+.link{border:0;background:none;color:#875a32;font-weight:800;padding:3px}
+.link:hover{text-decoration:underline}
+.footer-note{font-size:11px;color:var(--muted);margin-top:14px}
+.toast{position:fixed;bottom:20px;right:20px;background:#28231f;color:white;padding:12px 16px;border-radius:12px;box-shadow:var(--shadow);opacity:0;transform:translateY(12px);transition:.2s;z-index:40;pointer-events:none;font-size:13px;font-weight:600}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* Auth Screen */
+.auth-screen{min-height:100vh;display:grid;place-items:center;padding:22px;background:radial-gradient(circle at 15% 15%,#ead6bb 0,transparent 32%),radial-gradient(circle at 85% 85%,#dfc4a2 0,transparent 30%),var(--bg)}
+.auth-card{width:min(500px,100%);background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:0 24px 70px #4d382022}
+.auth-brand{display:flex;align-items:center;gap:13px;margin-bottom:20px}
+.auth-logo{width:54px;height:54px;border-radius:16px;background:#28231f;display:grid;place-items:center;box-shadow:inset 0 0 0 1px #ffffff20}
+.auth-brand h1{margin:0;font-size:24px;letter-spacing:.08em}
+.auth-brand p{margin:2px 0 0;color:var(--muted);font-size:11px;letter-spacing:.12em;font-weight:800}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#efe7dc;padding:5px;border-radius:12px;margin-bottom:18px}
+.auth-tabs button{border:0;background:transparent;padding:9px;border-radius:9px;font-weight:700;color:#62594f;font-size:13px}
+.auth-tabs button.active{background:var(--paper);color:var(--ink);box-shadow:0 2px 8px #0001}
+.auth-card h2{margin:0 0 4px;font-size:20px}
+.auth-desc{color:var(--muted);font-size:13px;margin:0 0 16px}
+.auth-card .field{margin:11px 0}
+.auth-submit{width:100%;margin-top:8px;padding:12px}
+.auth-error{display:none;margin-top:12px;padding:10px 12px;border-radius:9px;background:#fbe7e4;color:#9b302a;font-size:12px;font-weight:600}
+.auth-error.show{display:block}
+.demo-box{margin-top:18px;padding:14px;background:#f7f1e7;border:1px dashed #d3c2ab;border-radius:14px}
+.demo-box-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--brown);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.demo-accounts{display:grid;gap:6px}
+.demo-item{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:8px 11px;border-radius:9px;border:1px solid var(--line);font-size:12px;gap:8px}
+.demo-item-actions{display:flex;gap:5px;flex-shrink:0}
+.demo-item button{border:0;background:#eee5d9;color:#342b23;padding:5px 9px;border-radius:6px;font-size:11px;font-weight:700}
+.demo-item button:hover{background:var(--brown);color:#fff}
+.demo-item button.instant{background:#28231f;color:#efb84f}
+.demo-item button.instant:hover{background:var(--brown);color:#fff}
+.auth-foot{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.45}
+
+/* User Portal Cards & Stepper */
+.vehicle-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:8px}
+.v-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:8px}
+.v-card-plate{font-size:17px;font-weight:850;letter-spacing:.04em;background:#28231f;color:#efb84f;padding:4px 10px;border-radius:8px;display:inline-block;width:fit-content}
+.receipt-box{border:1px dashed #c8b8a4;border-radius:12px;padding:16px;background:#fff}
+
+/* Progress Stepper */
+.stepper{display:flex;align-items:center;gap:6px;margin:12px 0;font-size:12px}
+.step{flex:1;padding:8px 10px;border-radius:10px;background:#f2ece3;color:var(--muted);font-weight:700;text-align:center;border:1px solid transparent}
+.step.active{background:#fff0ce;color:#8a6116;border-color:#efd086}
+.step.done{background:#dff3e7;color:#26724c;border-color:#b2dfc5}
+
+@media print{
+  body{background:#fff}
+  .sidebar,.topbar,.notice,.btn,.modal-actions,.x{display:none!important}
+  .modal-backdrop{position:static;background:none;padding:0;display:block!important}
+  .modal{box-shadow:none;max-height:none;width:100%;padding:0}
+}
+@media(max-width:900px){
+  .app.unlocked{grid-template-columns:1fr}
+  .sidebar{padding:12px 14px;position:sticky;top:0;z-index:10;flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .brand{padding:0}
+  .brand-mark{width:36px;height:36px}
+  .role-card,.side-note{display:none}
+  .nav{display:flex;overflow:auto;gap:4px}
+  .nav button{padding:8px 10px;white-space:nowrap;font-size:13px}
+  .nav button.active{box-shadow:inset 0 -2px 0 var(--amber)}
+  .nav .ico{width:auto}
+  .main{padding-top:20px}
+  .grid2{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .sidebar{display:block}
+  .brand{margin-bottom:10px}
+  .nav{padding-bottom:2px}
+  .nav button{font-size:12px}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .stat{padding:13px}
+  .stat .value{font-size:21px}
+  .stat .symbol{width:34px;height:34px;font-size:17px}
+  .form-grid{grid-template-columns:1fr}
+  .field.full{grid-column:auto}
+  .mini-cards{grid-template-columns:1fr 1fr}
+  .main{padding-left:13px;padding-right:13px}
+  .panel{padding:13px}
+}
+</style>
+</head>
+<body>
+
+<!-- HALAMAN LOGIN & REGISTRASI -->
+<section class="auth-screen" id="authScreen">
+ <div class="auth-card">
+  <div class="auth-brand">
+   <div class="auth-logo">
+    <svg width="36" height="36" viewBox="0 0 48 48" fill="none" aria-label="Logo AUTORA">
+     <path d="M8 38 20.5 8h7L40 38h-8l-3-8H18l-3 8H8Z" fill="#EFB84F"/>
+     <path d="m20.5 24 3.5-9 3.5 9h-7Z" fill="#28231F"/>
+     <path d="M5 42h38" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+   </div>
+   <div>
+    <h1>AUTORA</h1>
+    <p>WORKSHOP MANAGEMENT SYSTEM</p>
+   </div>
+  </div>
+
+  <div class="auth-tabs">
+   <button type="button" class="active" id="tabLogin" onclick="switchAuthTab('login')">Masuk Akun</button>
+   <button type="button" id="tabRegister" onclick="switchAuthTab('register')">Daftar Pelanggan Baru</button>
+  </div>
+
+  <h2 id="authTitle">Masuk ke Sistem AUTORA</h2>
+  <p class="auth-desc" id="authDesc">Login berbeda untuk setiap pengguna sesuai hak akses: Admin, Operator, atau User Biasa.</p>
+
+  <form id="authForm">
+   <div class="field" id="regNameField" style="display:none">
+    <label for="regName">Nama Lengkap</label>
+    <input id="regName" placeholder="Contoh: Raka Wijaya">
+   </div>
+   <div class="field" id="regPhoneField" style="display:none">
+    <label for="regPhone">Nomor Telepon / WhatsApp</label>
+    <input id="regPhone" placeholder="Contoh: 0812-3456-7890">
+   </div>
+   <div class="field">
+    <label for="authUser">Username</label>
+    <input id="authUser" autocomplete="username" required placeholder="Masukkan username">
+   </div>
+   <div class="field">
+    <label for="authPass">Password</label>
+    <input id="authPass" type="password" autocomplete="current-password" required placeholder="Masukkan password">
+   </div>
+   <div class="field" id="confirmField" style="display:none">
+    <label for="authConfirm">Ulangi Password</label>
+    <input id="authConfirm" type="password" autocomplete="new-password" placeholder="Ulangi password">
+   </div>
+   <button class="btn accent auth-submit" id="authSubmit" type="submit">Masuk ke AUTORA →</button>
+   <div class="auth-error" id="authError" role="alert"></div>
+  </form>
+
+  <div class="demo-box" id="demoBox">
+   <div class="demo-box-title">
+    <span>⚡ Akun Demo Berbeda Role (Klik Isi atau Masuk Langsung)</span>
+   </div>
+   <div class="demo-accounts">
+    <div class="demo-item">
+     <div><b>Akun Admin (Pribadi)</b> <span class="role-badge admin">Admin</span><div class="muted" style="font-size:11px">Wajib ketik username &amp; password pribadi Admin secara manual</div></div>
+     <div class="demo-item-actions">
+       <span class="pill wait">Wajib Ketik Manual</span>
+     </div>
+    </div>
+    <div class="demo-item">
+     <div><b>Akun Operator (Pribadi)</b> <span class="role-badge operator">Operator</span><div class="muted" style="font-size:11px">Wajib ketik username &amp; password pribadi Operator secara manual</div></div>
+     <div class="demo-item-actions">
+       <span class="pill wait">Wajib Ketik Manual</span>
+     </div>
+    </div>
+    <div class="demo-item">
+     <div><b>andi</b> <span class="role-badge user">User Biasa</span><div class="muted" style="font-size:11px">Pelanggan 1: Booking servis, pantau & tagihan (Andi)</div></div>
+     <div class="demo-item-actions">
+       <button type="button" onclick="fillLogin('andi','User1234')">Isi</button>
+       <button type="button" class="instant" onclick="quickLogin('andi','User1234')">Masuk →</button>
+     </div>
+    </div>
+    <div class="demo-item">
+     <div><b>siti</b> <span class="role-badge user">User Biasa</span><div class="muted" style="font-size:11px">Pelanggan 2: Booking servis, pantau & tagihan (Siti)</div></div>
+     <div class="demo-item-actions">
+       <button type="button" onclick="fillLogin('siti','User1234')">Isi</button>
+       <button type="button" class="instant" onclick="quickLogin('siti','User1234')">Masuk →</button>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <div class="auth-foot">🔐 Akun <b>Admin</b> dan <b>Operator</b> bersifat pribadi dan wajib memasukkan <b>username</b> serta <b>password</b> secara manual. Setiap akun memiliki sesi &amp; data terisolasi.</div>
+ </div>
+</section>
+
+<!-- APLIKASI UTAMA -->
+<div class="app" id="appShell">
+<aside class="sidebar">
+  <div class="brand">
+   <div class="brand-mark">
+    <svg width="28" height="28" viewBox="0 0 48 48" fill="none" aria-label="Logo AUTORA">
+     <path d="M8 38 20.5 8h7L40 38h-8l-3-8H18l-3 8H8Z" fill="#28231f"/>
+     <path d="m20.5 24 3.5-9 3.5 9h-7Z" fill="#EFB84F"/>
+     <path d="M5 42h38" stroke="#28231f" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+   </div>
+   <div><b>AUTORA</b><small>WORKSHOP SYSTEM</small></div>
+  </div>
+
+  <div class="role-card" id="sidebarUserCard"></div>
+
+  <nav class="nav" id="nav"></nav>
+
+  <div class="side-note" id="sideNote"></div>
+</aside>
+
+<main class="main">
+<header class="topbar">
+ <div>
+  <div class="eyebrow" id="pageEyebrow">WORKSHOP MANAGEMENT</div>
+  <h1 id="pageTitle">Dashboard</h1>
+ </div>
+ <div class="top-actions">
+  <button class="btn secondary" id="resetBtn" style="display:none">↻ Reset Demo</button>
+  <span class="muted" id="signedInUser" style="font-size:12px;font-weight:600"></span>
+  <button class="btn danger" id="logoutBtn">Keluar</button>
+  <div class="avatar" id="userAvatar">👨‍🔧</div>
+ </div>
+</header>
+
+<div class="notice" id="roleNotice"></div>
+
+<!-- ==================== VIEW KHUSUS ADMIN: DASHBOARD LENGKAP ==================== -->
+<section class="view" id="view-dashboard">
+ <div class="stats" id="stats"></div>
+ <div class="grid2">
+  <div class="panel">
+   <div class="panel-head"><h2>📈 Pendapatan Bulanan</h2><span class="legend">Berdasarkan pembayaran masuk</span></div>
+   <canvas class="chart" id="revenueChart" width="720" height="260" aria-label="Grafik pendapatan bulanan"></canvas>
+  </div>
+  <div class="panel">
+   <div class="panel-head"><h2>⚡ Ringkasan Operasional</h2></div>
+   <div id="opsSummary"></div>
+  </div>
+ </div>
+ <div class="panel">
+  <div class="panel-head"><h2>🧾 Servis Terbaru</h2><button class="btn small accent" onclick="showView('servis')">Kelola semua servis →</button></div>
+  <div class="table-wrap" id="recentTable"></div>
+ </div>
+</section>
+
+<!-- ==================== VIEW KHUSUS USER BIASA: BOOKING, PANTAU & TAGIHAN ==================== -->
+<section class="view" id="view-portal">
+ <div class="stats" id="userStats"></div>
+ <div class="panel">
+  <div class="panel-head">
+   <div>
+     <h2>📅 Booking Servis & Pantau Progres</h2>
+     <div class="muted" style="font-size:12px">Ajukan booking servis baru dan pantau status pengerjaan kendaraan Anda secara langsung.</div>
+   </div>
+   <div class="toolbar-left">
+     <button class="btn small secondary" onclick="openUserVehicleForm()">＋ Tambah Kendaraan</button>
+     <button class="btn small accent" onclick="openUserBookingForm()">＋ Booking Servis Baru</button>
+   </div>
+  </div>
+  <div id="userVehiclesList"></div>
+  <div class="table-wrap" id="userServicesTable" style="margin-top:14px"></div>
+ </div>
+</section>
+
+<section class="view" id="view-tagihan">
+ <div class="stats" id="userBillStats"></div>
+ <div class="panel">
+  <div class="panel-head">
+   <div>
+     <h2>💳 Daftar Tagihan & Rincian Biaya Servis</h2>
+     <div class="muted" style="font-size:12px">Cek rincian biaya jasa, sparepart, status pembayaran, serta cetak bukti nota servis Anda.</div>
+   </div>
+  </div>
+  <div class="table-wrap" id="userBillsTable"></div>
+ </div>
+</section>
+
+<!-- ==================== VIEW OPERASIONAL (ADMIN & OPERATOR) ==================== -->
+<section class="view" id="view-servis">
+ <div class="stats" id="operatorQueueStats" style="display:none"></div>
+ <div class="toolbar">
+  <div><b>Antrean & Manajemen Servis</b><div class="muted">Kelola antrean masuk, tugaskan mekanik, rincian biaya, dan pembayaran pelanggan.</div></div>
+  <div class="toolbar-left">
+   <select class="filter-select" id="filterStatusServis" onchange="renderServis()">
+    <option value="">Semua Status Antrean</option>
+    <option value="Menunggu">Menunggu</option>
+    <option value="Dikerjakan">Dikerjakan</option>
+    <option value="Selesai">Selesai</option>
+    <option value="Dibatalkan">Dibatalkan</option>
+   </select>
+   <input class="search" id="searchServis" placeholder="Cari plat / keluhan / pelanggan…">
+   <button class="btn accent" onclick="openForm('servis')">＋ Tambah Antrean Servis</button>
+  </div>
+ </div>
+ <div class="panel"><div class="table-wrap" id="tableServis"></div></div>
+</section>
+
+<section class="view" id="view-pelanggan">
+ <div class="toolbar">
+  <div><b>Data Pelanggan</b><div class="muted">Kelola identitas pelanggan dan unit kendaraan mereka.</div></div>
+  <div class="toolbar-left">
+   <input class="search" id="searchPelanggan" placeholder="Cari nama / telepon / alamat…">
+   <button class="btn accent" onclick="openForm('pelanggan')">＋ Tambah Pelanggan</button>
+  </div>
+ </div>
+ <div class="panel"><div class="table-wrap" id="tablePelanggan"></div></div>
+</section>
+
+<!-- ==================== VIEW KHUSUS ADMIN: KENDARAAN, MEKANIK, LAPORAN, USER ==================== -->
+<section class="view" id="view-kendaraan">
+ <div class="toolbar">
+  <div><b>Data Kendaraan</b><div class="muted">Plat nomor, identitas kendaraan, dan pemilik.</div></div>
+  <div class="toolbar-left">
+   <input class="search" id="searchKendaraan" placeholder="Cari plat / merek / pemilik…">
+   <button class="btn accent" onclick="openForm('kendaraan')">＋ Tambah Kendaraan</button>
+  </div>
+ </div>
+ <div class="panel"><div class="table-wrap" id="tableKendaraan"></div></div>
+</section>
+
+<section class="view" id="view-mekanik">
+ <div class="toolbar">
+  <div><b>Tim Mekanik</b><div class="muted">Kelola data mekanik yang menangani servis bengkel.</div></div>
+  <div class="toolbar-left">
+   <input class="search" id="searchMekanik" placeholder="Cari nama / keahlian…">
+   <button class="btn accent" id="btnAddMekanik" onclick="openForm('mekanik')">＋ Tambah Mekanik</button>
+  </div>
+ </div>
+ <div class="panel"><div class="table-wrap" id="tableMekanik"></div></div>
+</section>
+
+<section class="view" id="view-laporan">
+ <div class="toolbar">
+  <div><b>Laporan Keuangan & Operasional</b><div class="muted">Rekap pendapatan bengkel dan status tagihan seluruh transaksi.</div></div>
+  <button class="btn accent" id="exportBtn">⇩ Ekspor CSV</button>
+ </div>
+ <div class="stats" id="reportStats"></div>
+ <div class="panel">
+  <div class="panel-head"><h2>Rekap Servis & Pembayaran</h2><span class="muted" id="reportPeriod"></span></div>
+  <div class="table-wrap" id="reportTable"></div>
+ </div>
+ <p class="footer-note">Catatan: Pendapatan adalah nominal yang sudah dibayarkan oleh pelanggan, tidak termasuk tagihan yang belum lunas atau dibatalkan.</p>
+</section>
+
+<section class="view" id="view-pengguna">
+ <div class="toolbar">
+  <div><b>Manajemen Akun & Hak Akses (RBAC)</b><div class="muted">Buat & kelola akun berbeda untuk setiap Admin, Operator, dan User Biasa.</div></div>
+  <div class="toolbar-left">
+   <input class="search" id="searchPengguna" placeholder="Cari username / nama / peran…">
+   <button class="btn accent" onclick="openUserAccountForm()">＋ Buat Akun Baru</button>
+  </div>
+ </div>
+ <div class="panel"><div class="table-wrap" id="tablePengguna"></div></div>
+</section>
+
+</main>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+ <div class="modal">
+  <div class="modal-head"><h2 id="modalTitle">Form</h2><button class="x" onclick="closeModal()">×</button></div>
+  <div id="modalBody"></div>
+ </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DB_KEY = 'autora_workshop_db_v3';
+const SESSION_KEY = 'autora_active_session_v3';
+
+const today = () => new Date().toISOString().slice(0, 10);
+const id = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-4);
+const rupiah = n => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(Number(n) || 0);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function bytesToHex(bytes) {
+  return Array.from(bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function makeSalt() {
+  const bytes = new Uint8Array(12);
+  if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(bytes);
+  else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+  return bytesToHex(bytes);
+}
+async function passwordDigest(password, salt) {
+  const subtle = window.crypto && window.crypto.subtle;
+  if (subtle) {
+    const enc = new TextEncoder();
+    const key = await subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
+    const bits = await subtle.deriveBits({ name: 'PBKDF2', salt: Uint8Array.from(salt.match(/../g), x => parseInt(x, 16)), iterations: 50000, hash: 'SHA-256' }, key, 256);
+    return 'pbkdf2:' + bytesToHex(bits);
+  }
+  let h1 = 2166136261, h2 = 2246822519;
+  const input = salt + '|' + password;
+  for (let r = 0; r < 3000; r++) {
+    for (let i = 0; i < input.length; i++) {
+      const c = input.charCodeAt(i) + r;
+      h1 = Math.imul(h1 ^ c, 16777619);
+      h2 = Math.imul(h2 ^ c, 2246822519);
+    }
+  }
+  return 'local:' + [h1, h2].map(v => (v >>> 0).toString(16).padStart(8, '0')).join('');
+}
+
+// Seed Data Awal: Admin, Operator, dan beberapa User Biasa yang berbeda
+async function buildSeedData() {
+  const mkUser = async (uid, username, nama, role, pass, pelangganId = null) => {
+    const salt = makeSalt();
+    const hash = await passwordDigest(pass, salt);
+    return { id: uid, username, nama, role, pelangganId, salt, hash, aktif: true, createdAt: today() };
+  };
+
+  const users = [
+    await mkUser('u_admin', 'admin', 'Administrator Utama', 'admin', 'Autora123', null),
+    await mkUser('u_op1', 'operator', 'Rizky Operator', 'operator', 'Operator123', null),
+    await mkUser('u_user1', 'andi', 'Andi Pratama', 'user', 'User1234', 'p1'),
+    await mkUser('u_user2', 'siti', 'Siti Rahma', 'user', 'User1234', 'p2')
+  ];
+
+  return {
+    users,
+    pelanggan: [
+      { id: 'p1', nama: 'Andi Pratama', telepon: '0812-0000-0101', alamat: 'Jl. Melati No. 12, Banda Aceh' },
+      { id: 'p2', nama: 'Siti Rahma', telepon: '0812-0000-0102', alamat: 'Jl. Kenanga No. 5, Banda Aceh' },
+      { id: 'p3', nama: 'Budi Santoso', telepon: '0812-0000-0103', alamat: 'Jl. Mawar No. 8, Banda Aceh' }
+    ],
+    kendaraan: [
+      { id: 'k1', pelangganId: 'p1', plat: 'BL 1234 AB', merek: 'Honda', model: 'Vario 125', tahun: 2021 },
+      { id: 'k2', pelangganId: 'p2', plat: 'BL 5678 CD', merek: 'Toyota', model: 'Avanza', tahun: 2019 },
+      { id: 'k3', pelangganId: 'p3', plat: 'BL 9012 EF', merek: 'Yamaha', model: 'NMAX', tahun: 2022 }
+    ],
+    mekanik: [
+      { id: 'm1', nama: 'Doni Saputra', telepon: '0813-0000-0201', keahlian: 'Mesin & Tune Up', aktif: true },
+      { id: 'm2', nama: 'Rina Amelia', telepon: '0813-0000-0202', keahlian: 'Kelistrikan & ECU', aktif: true },
+      { id: 'm3', nama: 'Agus Setiawan', telepon: '0813-0000-0203', keahlian: 'Rem & Kaki-kaki', aktif: true }
+    ],
+    servis: [
+      {
+        id: 's1', kendaraanId: 'k1', mekanikId: 'm1', tanggal: today(),
+        keluhan: 'Mesin terasa kurang bertenaga saat akselerasi',
+        diagnosa: 'Filter udara kotor & perlu pembersihan throttle body',
+        jenis: 'Tune Up', biayaJasa: 75000, status: 'Dikerjakan',
+        details: [{ id: 'd1', tipe: 'Sparepart', deskripsi: 'Filter udara OEM', jumlah: 1, harga: 45000 }],
+        payments: []
+      },
+      {
+        id: 's2', kendaraanId: 'k2', mekanikId: 'm3', tanggal: today(),
+        keluhan: 'Rem berbunyi decit saat diinjak',
+        diagnosa: 'Kampas rem depan sudah tipis',
+        jenis: 'Perbaikan Rem', biayaJasa: 120000, status: 'Selesai',
+        details: [{ id: 'd2', tipe: 'Sparepart', deskripsi: 'Kampas rem depan', jumlah: 1, harga: 180000 }],
+        payments: [{ id: 'pay2', tanggal: today(), jumlah: 300000, metode: 'Tunai' }]
+      },
+      {
+        id: 's3', kendaraanId: 'k3', mekanikId: null, tanggal: today(),
+        keluhan: 'Servis rutin 10.000 km & ganti oli',
+        diagnosa: 'Menunggu pengecekan mekanik',
+        jenis: 'Servis Berkala', biayaJasa: 50000, status: 'Menunggu',
+        details: [], payments: []
+      }
+    ]
+  };
+}
+
+let db = null;
+let currentUser = null;
+let authTab = 'login';
+
+function save() {
+  if (db) localStorage.setItem(DB_KEY, JSON.stringify(db));
+}
+
+// Konfigurasi Hak Akses Ketat Sesuai Permintaan:
+// 1. Admin: Mengakses semuanya
+// 2. Operator: Hanya kelola antrean servis, pelanggan & servis
+// 3. User Biasa: Hanya booking servis, pantau progres & tagihan
+const ROLE_CONFIG = {
+  admin: {
+    label: 'Admin',
+    avatar: '👑',
+    eyebrow: 'ADMINISTRATOR PANEL',
+    defaultView: 'dashboard',
+    menus: [
+      { id: 'dashboard', ico: '▦', label: 'Dashboard' },
+      { id: 'servis', ico: '🛠', label: 'Antrean & Servis' },
+      { id: 'pelanggan', ico: '♙', label: 'Pelanggan' },
+      { id: 'kendaraan', ico: '🚗', label: 'Kendaraan' },
+      { id: 'mekanik', ico: '🧑‍🔧', label: 'Mekanik' },
+      { id: 'laporan', ico: '▤', label: 'Laporan Keuangan' },
+      { id: 'pengguna', ico: '🔐', label: 'Manajemen User' }
+    ],
+    notice: '👑 <b>Mode Administrator:</b> Anda memiliki akses penuh ke seluruh fitur sistem (Dashboard, Servis, Pelanggan, Kendaraan, Mekanik, Laporan Keuangan & Manajemen Akun).',
+    sideNote: '<b>Hak Akses Admin:</b><br>• Akses penuh seluruh modul<br>• Hapus data & reset sistem<br>• Laporan keuangan & CSV<br>• Buat/kelola akun semua user'
+  },
+  operator: {
+    label: 'Operator',
+    avatar: '🎧',
+    eyebrow: 'OPERATOR FRONT-DESK',
+    defaultView: 'servis',
+    menus: [
+      { id: 'servis', ico: '🛠', label: 'Antrean & Servis' },
+      { id: 'pelanggan', ico: '♙', label: 'Pelanggan' }
+    ],
+    notice: '🎧 <b>Mode Operator:</b> Anda hanya memiliki akses untuk mengelola <b>Antrean Servis</b>, <b>Data Pelanggan</b>, dan <b>Transaksi Servis</b>.',
+    sideNote: '<b>Hak Akses Operator:</b><br>• Kelola antrean servis<br>• Proses status & mekanik servis<br>• Input rincian & pembayaran<br>• Kelola data pelanggan'
+  },
+  user: {
+    label: 'User Biasa',
+    avatar: '🚘',
+    eyebrow: 'PORTAL PELANGGAN AUTORA',
+    defaultView: 'portal',
+    menus: [
+      { id: 'portal', ico: '📅', label: 'Booking & Pantau' },
+      { id: 'tagihan', ico: '💳', label: 'Tagihan Saya' }
+    ],
+    notice: '🚘 <b>Portal Pelanggan:</b> Anda dapat mengajukan <b>Booking Servis</b>, memantau progres pengerjaan kendaraan, serta melihat <b>Tagihan & Nota</b> Anda.',
+    sideNote: '<b>Hak Akses User Biasa:</b><br>• Booking jadwal servis online<br>• Pantau status pengerjaan<br>• Lihat rincian & status tagihan<br>• Cetak struk / nota servis'
+  }
+};
+
+function canAccessView(viewId) {
+  if (!currentUser) return false;
+  const cfg = ROLE_CONFIG[currentUser.role];
+  return cfg && cfg.menus.some(m => m.id === viewId);
+}
+
+// Helper Perhitungan
+const total = s => (Number(s.biayaJasa) || 0) + (s.details || []).reduce((a, d) => a + d.jumlah * d.harga, 0);
+const paid = s => (s.payments || []).reduce((a, p) => a + p.jumlah, 0);
+const payStatus = s => {
+  if (s.status === 'Dibatalkan') return 'Dibatalkan';
+  return paid(s) <= 0 ? 'Belum lunas' : paid(s) >= total(s) ? 'Lunas' : 'Sebagian';
+};
+const customerName = pid => db.pelanggan.find(x => x.id === pid)?.nama || '—';
+const vehicle = kid => db.kendaraan.find(x => x.id === kid);
+const mechanicName = mid => db.mekanik.find(x => x.id === mid)?.nama || 'Belum ditugaskan';
+const statusPill = s => {
+  const c = s === 'Selesai' ? 'done' : s === 'Dikerjakan' ? 'work' : s === 'Dibatalkan' ? 'cancel' : 'wait';
+  return `<span class="pill ${c}">${esc(s)}</span>`;
+};
+const payPill = s => {
+  const st = payStatus(s);
+  const c = st === 'Lunas' ? 'paid' : st === 'Dibatalkan' ? 'cancel' : 'wait';
+  return `<span class="pill ${c}">${st}</span>`;
+};
+const roleBadge = r => {
+  const map = { admin: 'Admin', operator: 'Operator', user: 'User Biasa' };
+  return `<span class="role-badge ${esc(r)}">${map[r] || esc(r)}</span>`;
+};
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// Autentikasi & Switch Tab
+function switchAuthTab(tab) {
+  authTab = tab;
+  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('authError').classList.remove('show');
+  const isReg = tab === 'register';
+  document.getElementById('regNameField').style.display = isReg ? 'grid' : 'none';
+  document.getElementById('regPhoneField').style.display = isReg ? 'grid' : 'none';
+  document.getElementById('confirmField').style.display = isReg ? 'grid' : 'none';
+  document.getElementById('demoBox').style.display = isReg ? 'none' : 'block';
+  document.getElementById('authTitle').textContent = isReg ? 'Daftar Akun Pelanggan Baru' : 'Masuk ke Sistem AUTORA';
+  document.getElementById('authDesc').textContent = isReg
+    ? 'Buat akun pribadi Anda untuk memesan servis, memantau progres, dan melihat tagihan.'
+    : 'Login berbeda untuk setiap pengguna sesuai hak akses: Admin, Operator, atau User Biasa.';
+  document.getElementById('authSubmit').textContent = isReg ? 'Daftar & Masuk Sekarang →' : 'Masuk ke AUTORA →';
+}
+
+function fillLogin(username, pass) {
+  switchAuthTab('login');
+  document.getElementById('authUser').value = username;
+  document.getElementById('authPass').value = pass;
+  document.getElementById('authError').classList.remove('show');
+}
+
+async function quickLogin(username, pass) {
+  fillLogin(username, pass);
+  await handleLogin(username, pass);
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+function applySession(user) {
+  currentUser = user;
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify({ id: user.id }));
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('appShell').classList.add('unlocked');
+
+  const cfg = ROLE_CONFIG[user.role];
+  document.getElementById('userAvatar').textContent = cfg.avatar;
+  document.getElementById('signedInUser').innerHTML = `${esc(user.nama)} (@${esc(user.username)}) ${roleBadge(user.role)}`;
+  document.getElementById('pageEyebrow').textContent = cfg.eyebrow;
+  document.getElementById('roleNotice').innerHTML = `<div>${cfg.notice}</div>`;
+  document.getElementById('sideNote').innerHTML = cfg.sideNote;
+  document.getElementById('resetBtn').style.display = user.role === 'admin' ? 'inline-flex' : 'none';
+
+  document.getElementById('sidebarUserCard').innerHTML = `
+    <div style="font-size:24px">${cfg.avatar}</div>
+    <div style="min-width:0">
+      <div style="font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(user.nama)}</div>
+      <div style="font-size:11px;color:#c7bdb2">@${esc(user.username)}</div>
+      <div style="margin-top:4px">${roleBadge(user.role)}</div>
+    </div>`;
+
+  document.getElementById('nav').innerHTML = cfg.menus.map(m =>
+    `<button data-view="${m.id}"><span class="ico">${m.ico}</span>${m.label}</button>`
+  ).join('');
+
+  showView(cfg.defaultView);
+}
+
+async function handleLogin(username, password) {
+  const user = db.users.find(u => u.username.toLowerCase() === username.toLowerCase());
+  if (!user) {
+    showAuthError('Username tidak ditemukan.');
+    return;
+  }
+  if (!user.aktif) {
+    showAuthError('Akun ini sedang dinonaktifkan oleh Administrator.');
+    return;
+  }
+  const hash = await passwordDigest(password, user.salt);
+  if (hash !== user.hash) {
+    showAuthError('Password yang dimasukkan salah.');
+    return;
+  }
+  applySession(user);
+  toast(`Berhasil masuk sebagai ${user.nama} (${ROLE_CONFIG[user.role].label})`);
+}
+
+document.getElementById('authForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const username = document.getElementById('authUser').value.trim().toLowerCase();
+  const password = document.getElementById('authPass').value;
+  document.getElementById('authError').classList.remove('show');
+
+  if (!username || !password) {
+    showAuthError('Username dan password wajib diisi.');
+    return;
+  }
+
+  if (authTab === 'register') {
+    const nama = document.getElementById('regName').value.trim();
+    const telepon = document.getElementById('regPhone').value.trim();
+    const confirmPass = document.getElementById('authConfirm').value;
+    if (!nama) { showAuthError('Nama lengkap wajib diisi.'); return; }
+    if (!/^[a-z0-9_.-]{3,20}$/.test(username)) { showAuthError('Username 3-20 karakter (huruf kecil, angka, titik, underscore).'); return; }
+    if (password.length < 6) { showAuthError('Password minimal 6 karakter.'); return; }
+    if (password !== confirmPass) { showAuthError('Konfirmasi password tidak cocok.'); return; }
+    if (db.users.some(u => u.username.toLowerCase() === username)) {
+      showAuthError('Username sudah digunakan, silakan pilih username lain.');
+      return;
+    }
+
+    const pid = 'p_' + id();
+    db.pelanggan.push({ id: pid, nama, telepon: telepon || '-', alamat: 'Terdaftar mandiri' });
+    const salt = makeSalt();
+    const hash = await passwordDigest(password, salt);
+    const newUser = {
+      id: 'u_' + id(),
+      username,
+      nama,
+      role: 'user',
+      pelangganId: pid,
+      salt,
+      hash,
+      aktif: true,
+      createdAt: today()
+    };
+    db.users.push(newUser);
+    save();
+    applySession(newUser);
+    toast('Akun berhasil dibuat! Selamat datang, ' + nama);
+  } else {
+    await handleLogin(username, password);
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  sessionStorage.removeItem(SESSION_KEY);
+  currentUser = null;
+  document.getElementById('appShell').classList.remove('unlocked');
+  document.getElementById('authScreen').style.display = 'grid';
+  document.getElementById('authForm').reset();
+  switchAuthTab('login');
+  toast('Anda telah keluar dari sistem.');
+});
+
+// Navigasi View dengan Validasi Hak Akses
+function showView(v) {
+  if (!canAccessView(v)) {
+    v = ROLE_CONFIG[currentUser.role].defaultView;
+  }
+  document.querySelectorAll('.view').forEach(x => x.classList.toggle('active', x.id === 'view-' + v));
+  document.querySelectorAll('.nav button').forEach(x => x.classList.toggle('active', x.dataset.view === v));
+
+  const titles = {
+    dashboard: 'Dashboard Administrator',
+    portal: 'Booking & Pantau Servis',
+    tagihan: 'Tagihan & Pembayaran Saya',
+    pelanggan: 'Data Pelanggan',
+    kendaraan: 'Data Kendaraan',
+    mekanik: 'Tim Mekanik',
+    servis: 'Antrean & Manajemen Servis',
+    laporan: 'Laporan Keuangan',
+    pengguna: 'Manajemen User & Hak Akses'
+  };
+  document.getElementById('pageTitle').textContent = titles[v] || 'AUTORA';
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('nav').addEventListener('click', e => {
+  const b = e.target.closest('button[data-view]');
+  if (b) showView(b.dataset.view);
+});
+
+function table(headers, rows, emptyMsg = 'Belum ada data untuk ditampilkan.') {
+  return rows.length
+    ? `<table><thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table>`
+    : `<div class="empty">${emptyMsg}</div>`;
+}
+
+function render() {
+  if (!currentUser) return;
+  if (currentUser.role === 'user') {
+    renderUserPortal();
+    renderUserBills();
+    return;
+  }
+  if (currentUser.role === 'operator') {
+    renderServis();
+    renderPelanggan();
+    return;
+  }
+  // Admin: render semua
+  renderDashboard();
+  renderServis();
+  renderPelanggan();
+  renderKendaraan();
+  renderMekanik();
+  renderReports();
+  renderPengguna();
+}
+
+// ==================== 1. PORTAL USER BIASA (HANYA BOOKING, PANTAU & TAGIHAN) ====================
+function getMyPelangganId() {
+  if (currentUser.pelangganId && db.pelanggan.some(p => p.id === currentUser.pelangganId)) {
+    return currentUser.pelangganId;
+  }
+  const pid = 'p_' + id();
+  db.pelanggan.push({ id: pid, nama: currentUser.nama, telepon: '-', alamat: '-' });
+  currentUser.pelangganId = pid;
+  save();
+  return pid;
+}
+
+function renderUserPortal() {
+  const pid = getMyPelangganId();
+  const myVehicles = db.kendaraan.filter(k => k.pelangganId === pid);
+  const myVehicleIds = myVehicles.map(v => v.id);
+  const myServices = [...db.servis].filter(s => myVehicleIds.includes(s.kendaraanId)).sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+  const activeCount = myServices.filter(s => s.status === 'Menunggu' || s.status === 'Dikerjakan').length;
+  const doneCount = myServices.filter(s => s.status === 'Selesai').length;
+
+  document.getElementById('userStats').innerHTML = [
+    ['Kendaraan Saya', myVehicles.length, '🚗', 'Terdaftar atas nama Anda'],
+    ['Dalam Antrean / Proses', activeCount, '⏳', 'Menunggu atau sedang dikerjakan'],
+    ['Servis Selesai', doneCount, '✅', 'Riwayat servis selesai']
+  ].map(x => `<div class="stat"><div class="label">${x[0]}</div><div class="symbol">${x[2]}</div><div class="value" style="font-size:23px">${x[1]}</div><div class="hint">${x[3]}</div></div>`).join('');
+
+  document.getElementById('userVehiclesList').innerHTML = myVehicles.length
+    ? `<div class="vehicle-cards">${myVehicles.map(v => {
+        const srvCount = myServices.filter(s => s.kendaraanId === v.id).length;
+        return `<div class="v-card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span class="v-card-plate">${esc(v.plat)}</span>
+            <span class="muted" style="font-size:12px">${srvCount}x servis</span>
+          </div>
+          <div style="font-weight:700;font-size:16px">${esc(v.merek)} ${esc(v.model)}</div>
+          <div class="muted" style="font-size:12px">Tahun: ${esc(v.tahun || '—')}</div>
+          <div style="margin-top:6px;display:flex;gap:8px">
+            <button class="btn small accent" onclick="openUserBookingForm('${v.id}')">📅 Booking Servis</button>
+            <button class="btn small secondary" onclick="openUserVehicleForm('${v.id}')">Edit</button>
+          </div>
+        </div>`;
+      }).join('')}</div>`
+    : `<div class="empty">Anda belum mendaftarkan kendaraan. Klik <b>"+ Tambah Kendaraan"</b> untuk mulai booking servis.</div>`;
+
+  const rows = myServices.map(s => {
+    const v = vehicle(s.kendaraanId);
+    const canCancel = s.status === 'Menunggu' && paid(s) === 0;
+    return `<tr>
+      <td>${esc(s.tanggal)}</td>
+      <td><b>${esc(v?.plat || '—')}</b><div class="muted">${esc(v?.merek || '')} ${esc(v?.model || '')}</div></td>
+      <td><b>${esc(s.jenis)}</b><div class="muted" style="max-width:220px;overflow:hidden;text-overflow:ellipsis">${esc(s.keluhan)}</div></td>
+      <td>${esc(mechanicName(s.mekanikId))}</td>
+      <td>${statusPill(s.status)}</td>
+      <td><b>${rupiah(total(s))}</b><div style="margin-top:2px">${payPill(s)}</div></td>
+      <td>
+        <div class="row-actions">
+          <button class="btn small secondary" onclick="openUserServiceDetail('${s.id}')">Pantau & Nota</button>
+          ${canCancel ? `<button class="btn small danger" onclick="cancelUserBooking('${s.id}')">Batalkan</button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  });
+
+  document.getElementById('userServicesTable').innerHTML = table(
+    ['Tanggal Booking', 'Kendaraan', 'Layanan & Keluhan', 'Mekanik', 'Progres Pengerjaan', 'Estimasi / Tagihan', 'Aksi'],
+    rows,
+    'Belum ada riwayat booking servis. Klik "+ Booking Servis Baru" untuk memesan.'
+  );
+}
+
+function renderUserBills() {
+  const pid = getMyPelangganId();
+  const myVehicleIds = db.kendaraan.filter(k => k.pelangganId === pid).map(v => v.id);
+  const myBills = [...db.servis]
+    .filter(s => myVehicleIds.includes(s.kendaraanId) && s.status !== 'Dibatalkan')
+    .sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+
+  const totalBilled = myBills.reduce((a, s) => a + total(s), 0);
+  const totalPaid = myBills.reduce((a, s) => a + paid(s), 0);
+  const totalUnpaid = Math.max(0, totalBilled - totalPaid);
+
+  document.getElementById('userBillStats').innerHTML = [
+    ['Total Biaya Servis', rupiah(totalBilled), '🧾', 'Akumulasi seluruh servis'],
+    ['Sudah Dibayarkan', rupiah(totalPaid), '✅', 'Pembayaran terverifikasi'],
+    ['Sisa Tagihan Anda', rupiah(totalUnpaid), '💳', totalUnpaid > 0 ? 'Segera selesaikan di kasir' : 'Semua tagihan lunas']
+  ].map(x => `<div class="stat"><div class="label">${x[0]}</div><div class="symbol">${x[2]}</div><div class="value" style="font-size:21px">${x[1]}</div><div class="hint">${x[3]}</div></div>`).join('');
+
+  const rows = myBills.map(s => {
+    const v = vehicle(s.kendaraanId);
+    const sisa = Math.max(0, total(s) - paid(s));
+    return `<tr>
+      <td>${esc(s.tanggal)}</td>
+      <td><b>${esc(v?.plat || '—')}</b><div class="muted">${esc(s.jenis)}</div></td>
+      <td>${statusPill(s.status)}</td>
+      <td>${rupiah(total(s))}</td>
+      <td style="color:var(--green);font-weight:700">${rupiah(paid(s))}</td>
+      <td style="color:${sisa > 0 ? 'var(--red)' : 'var(--muted)'};font-weight:700">${rupiah(sisa)}</td>
+      <td>${payPill(s)}</td>
+      <td><button class="btn small accent" onclick="openUserServiceDetail('${s.id}')">Rincian & Cetak Nota</button></td>
+    </tr>`;
+  });
+
+  document.getElementById('userBillsTable').innerHTML = table(
+    ['Tanggal', 'Kendaraan & Servis', 'Status Servis', 'Total Tagihan', 'Dibayar', 'Sisa Tagihan', 'Status Bayar', 'Aksi'],
+    rows,
+    'Belum ada data tagihan servis untuk akun Anda.'
+  );
+}
+
+function openUserVehicleForm(kid = null) {
+  const pid = getMyPelangganId();
+  const item = kid ? db.kendaraan.find(k => k.id === kid && k.pelangganId === pid) : {};
+  modal(kid ? 'Edit Kendaraan Saya' : 'Tambah Kendaraan Saya', `
+    <form id="userVehicleForm">
+      <div class="form-grid">
+        <div class="field"><label>Plat Nomor</label><input name="plat" value="${esc(item.plat || '')}" required placeholder="Contoh: BL 4567 XY"></div>
+        <div class="field"><label>Merek</label><input name="merek" value="${esc(item.merek || '')}" required placeholder="Contoh: Honda / Toyota"></div>
+        <div class="field"><label>Model / Tipe</label><input name="model" value="${esc(item.model || '')}" required placeholder="Contoh: Beat / Avanza"></div>
+        <div class="field"><label>Tahun</label><input name="tahun" type="number" min="1970" max="${new Date().getFullYear() + 1}" value="${esc(item.tahun || 2022)}"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" onclick="closeModal()">Batal</button>
+        <button type="submit" class="btn accent">Simpan Kendaraan</button>
+      </div>
+    </form>`);
+
+  document.getElementById('userVehicleForm').onsubmit = e => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target));
+    d.plat = d.plat.trim().toUpperCase().replace(/\s+/g, ' ');
+    if (db.kendaraan.some(k => k.plat === d.plat && k.id !== kid)) {
+      toast('Nomor plat sudah terdaftar di sistem.');
+      return;
+    }
+    d.tahun = d.tahun ? Number(d.tahun) : null;
+    if (kid) {
+      Object.assign(item, d);
+    } else {
+      db.kendaraan.push({ id: 'k_' + id(), pelangganId: pid, ...d });
+    }
+    save();
+    closeModal();
+    render();
+    toast('Kendaraan Anda berhasil disimpan.');
+  };
+}
+
+function openUserBookingForm(preselectVehicleId = '') {
+  const pid = getMyPelangganId();
+  const myVehicles = db.kendaraan.filter(k => k.pelangganId === pid);
+  if (!myVehicles.length) {
+    toast('Tambahkan kendaraan Anda terlebih dahulu sebelum booking servis.');
+    openUserVehicleForm();
+    return;
+  }
+
+  modal('Booking Servis Online', `
+    <form id="userBookingForm">
+      <div class="form-grid">
+        <div class="field">
+          <label>Pilih Kendaraan Anda</label>
+          <select name="kendaraanId" required>
+            ${myVehicles.map(k => `<option value="${esc(k.id)}" ${k.id === preselectVehicleId ? 'selected' : ''}>${esc(k.plat)} — ${esc(k.merek)} ${esc(k.model)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Tanggal Rencana Servis</label>
+          <input type="date" name="tanggal" min="${today()}" value="${today()}" required>
+        </div>
+        <div class="field full">
+          <label>Jenis Layanan Servis</label>
+          <select name="jenis" required>
+            <option value="Servis Berkala">Servis Berkala & Ganti Oli</option>
+            <option value="Tune Up">Tune Up Mesin</option>
+            <option value="Perbaikan Rem">Perbaikan Rem & Kaki-kaki</option>
+            <option value="Kelistrikan">Pemeriksaan Kelistrikan / Aki</option>
+            <option value="Servis Umum">Keluhan Umum / Pemeriksaan</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Keluhan Kendaraan</label>
+          <textarea name="keluhan" required placeholder="Tuliskan keluhan atau gejala pada kendaraan Anda..."></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" onclick="closeModal()">Batal</button>
+        <button type="submit" class="btn accent">Kirim Booking Servis</button>
+      </div>
+    </form>`);
+
+  document.getElementById('userBookingForm').onsubmit = e => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target));
+    db.servis.push({
+      id: 's_' + id(),
+      kendaraanId: d.kendaraanId,
+      mekanikId: null,
+      tanggal: d.tanggal,
+      keluhan: d.keluhan.trim(),
+      diagnosa: 'Booking online pelanggan — menunggu pemeriksaan mekanik',
+      jenis: d.jenis,
+      biayaJasa: 50000,
+      status: 'Menunggu',
+      details: [],
+      payments: []
+    });
+    save();
+    closeModal();
+    render();
+    toast('Booking servis berhasil dikirim! Status Anda sekarang dalam antrean.');
+  };
+}
+
+function cancelUserBooking(sid) {
+  const s = db.servis.find(x => x.id === sid);
+  if (!s || s.status !== 'Menunggu') return;
+  if (!confirm('Batalkan pengajuan booking servis ini?')) return;
+  s.status = 'Dibatalkan';
+  save();
+  render();
+  toast('Booking servis telah dibatalkan.');
+}
+
+function openUserServiceDetail(sid) {
+  const s = db.servis.find(x => x.id === sid);
+  if (!s) return;
+  const v = vehicle(s.kendaraanId);
+  const step1 = s.status !== 'Dibatalkan' ? 'done' : '';
+  const step2 = s.status === 'Dikerjakan' ? 'active' : s.status === 'Selesai' ? 'done' : '';
+  const step3 = s.status === 'Selesai' ? 'done' : '';
+
+  modal('Pantau Progres & Nota Tagihan · ' + (v?.plat || ''), `
+    ${s.status !== 'Dibatalkan' ? `
+      <div class="stepper">
+        <div class="step ${step1}">1. Antrean Masuk</div>
+        <div class="step ${step2}">2. Sedang Dikerjakan</div>
+        <div class="step ${step3}">3. Selesai</div>
+      </div>` : `<div style="margin-bottom:12px">${statusPill('Dibatalkan')}</div>`}
+    <div class="receipt-box">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:12px">
+        <div>
+          <b style="font-size:17px">BENGKEL AUTORA</b>
+          <div class="muted" style="font-size:12px">No. Servis: #${esc(s.id.toUpperCase())} · Tanggal: ${esc(s.tanggal)}</div>
+        </div>
+        <div style="text-align:right">
+          ${statusPill(s.status)} ${payPill(s)}
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;margin-bottom:14px">
+        <div><span class="muted">Pelanggan:</span> <b>${esc(customerName(v?.pelangganId))}</b></div>
+        <div><span class="muted">Kendaraan:</span> <b>${esc(v?.plat)} (${esc(v?.merek)} ${esc(v?.model)})</b></div>
+        <div><span class="muted">Jenis Servis:</span> <b>${esc(s.jenis)}</b></div>
+        <div><span class="muted">Mekanik:</span> <b>${esc(mechanicName(s.mekanikId))}</b></div>
+      </div>
+      <p style="font-size:13px;margin:6px 0"><b>Keluhan:</b> ${esc(s.keluhan)}</p>
+      <p style="font-size:13px;margin:6px 0 14px"><b>Catatan / Diagnosa Mekanik:</b> ${esc(s.diagnosa || 'Belum ada catatan')}</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Item / Deskripsi</th><th>Qty</th><th>Harga</th><th>Subtotal</th></tr></thead>
+          <tbody>
+            <tr><td>Biaya Jasa Utama (${esc(s.jenis)})</td><td>1</td><td>${rupiah(s.biayaJasa)}</td><td>${rupiah(s.biayaJasa)}</td></tr>
+            ${(s.details || []).map(d => `<tr><td>[${esc(d.tipe)}] ${esc(d.deskripsi)}</td><td>${d.jumlah}</td><td>${rupiah(d.harga)}</td><td>${rupiah(d.jumlah * d.harga)}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px;display:grid;gap:4px;font-size:13px">
+        <div style="display:flex;justify-content:space-between"><span>Total Tagihan:</span><b>${rupiah(total(s))}</b></div>
+        <div style="display:flex;justify-content:space-between"><span>Sudah Dibayar:</span><b style="color:var(--green)">${rupiah(paid(s))}</b></div>
+        <div style="display:flex;justify-content:space-between"><span>Sisa Tagihan:</span><b style="color:var(--red)">${rupiah(s.status === 'Dibatalkan' ? 0 : Math.max(0, total(s) - paid(s)))}</b></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn secondary" onclick="window.print()">🖨 Cetak Nota</button>
+      <button type="button" class="btn accent" onclick="closeModal()">Tutup</button>
+    </div>`);
+}
+
+// ==================== 2. RENDER ADMIN & OPERATOR ====================
+function renderDashboard() {
+  const activeServices = db.servis.filter(s => s.status !== 'Dibatalkan');
+  const revenue = activeServices.reduce((a, s) => a + paid(s), 0);
+  const todayCount = activeServices.filter(s => s.tanggal === today()).length;
+
+  const stats = [
+    ['Total Pelanggan', db.pelanggan.length, '♙', 'Pemilik terdaftar'],
+    ['Total Kendaraan', db.kendaraan.length, '🚗', 'Unit terdaftar'],
+    ['Servis Hari Ini', todayCount, '🗓', 'Pekerjaan masuk'],
+    ['Sedang Dikerjakan', activeServices.filter(s => s.status === 'Dikerjakan').length, '🛠', 'Dalam pengerjaan'],
+    ['Servis Selesai', activeServices.filter(s => s.status === 'Selesai').length, '✓', 'Selesai dikerjakan'],
+    ['Pendapatan Masuk', rupiah(revenue), '💰', 'Pembayaran diterima']
+  ];
+
+  document.getElementById('stats').innerHTML = stats.map(x =>
+    `<div class="stat"><div class="label">${x[0]}</div><div class="symbol">${x[2]}</div><div class="value" style="${x[0] === 'Pendapatan Masuk' ? 'font-size:21px' : ''}">${x[1]}</div><div class="hint">${x[3]}</div></div>`
+  ).join('');
+
+  const counts = ['Menunggu', 'Dikerjakan', 'Selesai'].map(st => [st, activeServices.filter(s => s.status === st).length]);
+  document.getElementById('opsSummary').innerHTML = counts.map(([n, v]) =>
+    `<div style="display:flex;justify-content:space-between;padding:13px 2px;border-bottom:1px solid var(--line)"><span>${statusPill(n)}</span><b>${v} servis</b></div>`
+  ).join('') + `<div class="mini-cards" style="margin-top:14px">
+    <div class="mini"><b>${activeServices.filter(s => payStatus(s) !== 'Lunas').length}</b><span>Belum lunas</span></div>
+    <div class="mini"><b>${db.mekanik.filter(m => m.aktif).length}</b><span>Mekanik aktif</span></div>
+    <div class="mini"><b>${db.users.length}</b><span>Akun terdaftar</span></div>
+  </div>`;
+
+  const rows = [...db.servis].sort((a, b) => b.tanggal.localeCompare(a.tanggal)).slice(0, 6).map(s => {
+    const v = vehicle(s.kendaraanId);
+    return `<tr>
+      <td><b>${esc(v?.plat || '—')}</b><div class="muted">${esc(v?.merek || '')} ${esc(v?.model || '')}</div></td>
+      <td>${esc(customerName(v?.pelangganId))}</td>
+      <td>${esc(s.jenis)}</td>
+      <td>${esc(mechanicName(s.mekanikId))}</td>
+      <td>${statusPill(s.status)}</td>
+      <td>${rupiah(total(s))}</td>
+      <td><button class="link" onclick="openService('${s.id}')">Kelola →</button></td>
+    </tr>`;
+  });
+  document.getElementById('recentTable').innerHTML = table(['Kendaraan', 'Pelanggan', 'Jenis Servis', 'Mekanik', 'Status', 'Total', ''], rows);
+  drawChart();
+}
+
+function drawChart() {
+  const c = document.getElementById('revenueChart');
+  if (!c) return;
+  const ctx = c.getContext('2d'), w = c.width, h = c.height;
+  ctx.clearRect(0, 0, w, h);
+  const months = [];
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    months.push({ key: d.toISOString().slice(0, 7), label: d.toLocaleDateString('id-ID', { month: 'short' }) });
+  }
+  const vals = months.map(m => db.servis.reduce((a, s) => a + (s.payments || []).filter(p => p.tanggal?.slice(0, 7) === m.key).reduce((x, p) => x + p.jumlah, 0), 0));
+  const max = Math.max(100000, ...vals), left = 58, bottom = 218, top = 16, chartW = w - left - 18, chartH = bottom - top;
+  ctx.strokeStyle = '#e9e0d4'; ctx.fillStyle = '#777168'; ctx.font = '12px sans-serif'; ctx.textAlign = 'right';
+  for (let i = 0; i < 4; i++) {
+    const y = top + i * chartH / 3;
+    ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(w - 10, y); ctx.stroke();
+    ctx.fillText(i === 0 ? 'Rp ' + Math.round(max / 1000) + 'k' : i === 3 ? '0' : '', left - 8, y + 4);
+  }
+  const slot = chartW / 6, bw = Math.min(48, slot * .48);
+  vals.forEach((v, i) => {
+    const bh = v / max * (chartH - 8), x = left + i * slot + (slot - bw) / 2, y = bottom - bh;
+    ctx.fillStyle = '#c99b6b';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(x, y, bw, bh, 7); else ctx.rect(x, y, bw, bh);
+    ctx.fill();
+    ctx.fillStyle = '#777168'; ctx.textAlign = 'center';
+    ctx.fillText(months[i].label, x + bw / 2, bottom + 20);
+  });
+}
+
+function renderServis() {
+  const q = (document.getElementById('searchServis')?.value || '').toLowerCase();
+  const stFilter = document.getElementById('filterStatusServis')?.value || '';
+  const opStatsEl = document.getElementById('operatorQueueStats');
+
+  if (currentUser.role === 'operator') {
+    opStatsEl.style.display = 'grid';
+    const waiting = db.servis.filter(s => s.status === 'Menunggu').length;
+    const working = db.servis.filter(s => s.status === 'Dikerjakan').length;
+    const doneToday = db.servis.filter(s => s.status === 'Selesai' && s.tanggal === today()).length;
+    opStatsEl.innerHTML = [
+      ['Antrean Menunggu', waiting, '⏳', 'Perlu segera ditangani'],
+      ['Sedang Dikerjakan', working, '🛠', 'Dalam proses mekanik'],
+      ['Selesai Hari Ini', doneToday, '✅', 'Siap diambil / dibayar']
+    ].map(x => `<div class="stat"><div class="label">${x[0]}</div><div class="symbol">${x[2]}</div><div class="value" style="font-size:24px">${x[1]}</div><div class="hint">${x[3]}</div></div>`).join('');
+  } else {
+    opStatsEl.style.display = 'none';
+  }
+
+  const arr = [...db.servis]
+    .sort((a, b) => b.tanggal.localeCompare(a.tanggal))
+    .filter(s => {
+      if (stFilter && s.status !== stFilter) return false;
+      const v = vehicle(s.kendaraanId);
+      return ((v?.plat || '') + ' ' + customerName(v?.pelangganId) + ' ' + s.keluhan + ' ' + s.jenis).toLowerCase().includes(q);
+    });
+
+  document.getElementById('tableServis').innerHTML = table(
+    ['Tanggal', 'Kendaraan / Pemilik', 'Keluhan & Jenis', 'Mekanik', 'Status Antrean', 'Pembayaran', 'Total', 'Aksi'],
+    arr.map(s => {
+      const v = vehicle(s.kendaraanId);
+      return `<tr>
+        <td>${esc(s.tanggal)}</td>
+        <td><b>${esc(v?.plat || '—')}</b><div class="muted">${esc(customerName(v?.pelangganId))}</div></td>
+        <td><b>${esc(s.jenis)}</b><div class="muted" style="max-width:220px;overflow:hidden;text-overflow:ellipsis">${esc(s.keluhan)}</div></td>
+        <td>${esc(mechanicName(s.mekanikId))}</td>
+        <td>${statusPill(s.status)}</td>
+        <td>${payPill(s)}</td>
+        <td><b>${rupiah(total(s))}</b></td>
+        <td><button class="btn small accent" onclick="openService('${s.id}')">Kelola Antrean</button></td>
+      </tr>`;
+    })
+  );
+}
+
+function renderPelanggan() {
+  const q = (document.getElementById('searchPelanggan')?.value || '').toLowerCase();
+  const isAdmin = currentUser.role === 'admin';
+  const arr = db.pelanggan.filter(p => (p.nama + ' ' + p.telepon + ' ' + p.alamat).toLowerCase().includes(q));
+  document.getElementById('tablePelanggan').innerHTML = table(
+    ['Nama Pelanggan', 'Telepon', 'Alamat', 'Akun Login', 'Kendaraan', 'Aksi'],
+    arr.map(p => {
+      const linkedUser = db.users.find(u => u.pelangganId === p.id);
+      return `<tr>
+        <td><b>${esc(p.nama)}</b></td>
+        <td>${esc(p.telepon || '—')}</td>
+        <td>${esc(p.alamat || '—')}</td>
+        <td>${linkedUser ? `<span class="pill done">@${esc(linkedUser.username)}</span>` : '<span class="muted">Offline</span>'}</td>
+        <td>${db.kendaraan.filter(k => k.pelangganId === p.id).length} unit</td>
+        <td><div class="row-actions">
+          <button class="btn small secondary" onclick="openForm('pelanggan','${p.id}')">Edit</button>
+          <button class="btn small secondary" onclick="openQuickVehicleForCustomer('${p.id}')">＋ Kendaraan</button>
+          ${isAdmin ? `<button class="btn small danger" onclick="removeItem('pelanggan','${p.id}')">Hapus</button>` : ''}
+        </div></td>
+      </tr>`;
+    })
+  );
+}
+
+function renderKendaraan() {
+  if (currentUser.role !== 'admin') return;
+  const q = (document.getElementById('searchKendaraan')?.value || '').toLowerCase();
+  const arr = db.kendaraan.filter(k => (k.plat + ' ' + k.merek + ' ' + k.model + ' ' + customerName(k.pelangganId)).toLowerCase().includes(q));
+  document.getElementById('tableKendaraan').innerHTML = table(
+    ['Plat Nomor', 'Kendaraan', 'Tahun', 'Pemilik', 'Riwayat', 'Aksi'],
+    arr.map(k => `<tr>
+      <td><b>${esc(k.plat)}</b></td>
+      <td>${esc(k.merek)} ${esc(k.model)}</td>
+      <td>${esc(k.tahun || '—')}</td>
+      <td>${esc(customerName(k.pelangganId))}</td>
+      <td><button class="link" onclick="vehicleHistory('${k.id}')">Lihat riwayat</button></td>
+      <td><div class="row-actions">
+        <button class="btn small secondary" onclick="openForm('kendaraan','${k.id}')">Edit</button>
+        <button class="btn small danger" onclick="removeItem('kendaraan','${k.id}')">Hapus</button>
+      </div></td>
+    </tr>`)
+  );
+}
+
+function renderMekanik() {
+  if (currentUser.role !== 'admin') return;
+  const q = (document.getElementById('searchMekanik')?.value || '').toLowerCase();
+  const arr = db.mekanik.filter(m => (m.nama + ' ' + m.keahlian).toLowerCase().includes(q));
+  document.getElementById('tableMekanik').innerHTML = table(
+    ['Nama Mekanik', 'Telepon', 'Keahlian', 'Status', 'Aksi'],
+    arr.map(m => `<tr>
+      <td><b>${esc(m.nama)}</b></td>
+      <td>${esc(m.telepon || '—')}</td>
+      <td>${esc(m.keahlian || '—')}</td>
+      <td><span class="pill ${m.aktif ? 'done' : 'wait'}">${m.aktif ? 'Aktif' : 'Nonaktif'}</span></td>
+      <td><div class="row-actions">
+        <button class="btn small secondary" onclick="openForm('mekanik','${m.id}')">Edit</button>
+        <button class="btn small danger" onclick="removeItem('mekanik','${m.id}')">${m.aktif ? 'Nonaktifkan' : 'Hapus'}</button>
+      </div></td>
+    </tr>`)
+  );
+}
+
+function renderReports() {
+  if (currentUser.role !== 'admin') return;
+  const validServices = db.servis.filter(s => s.status !== 'Dibatalkan');
+  const rev = validServices.reduce((a, s) => a + paid(s), 0);
+  const billed = validServices.reduce((a, s) => a + total(s), 0);
+  const outstanding = Math.max(0, billed - rev);
+
+  document.getElementById('reportStats').innerHTML = [
+    ['Total Tagihan Aktif', rupiah(billed)],
+    ['Pembayaran Diterima', rupiah(rev)],
+    ['Sisa Piutang / Belum Lunas', rupiah(outstanding)]
+  ].map(x => `<div class="stat"><div class="label">${x[0]}</div><div class="value" style="font-size:21px">${x[1]}</div></div>`).join('');
+
+  document.getElementById('reportPeriod').textContent = `${db.servis.length} total catatan servis`;
+  const rows = db.servis.map(s => {
+    const v = vehicle(s.kendaraanId);
+    return `<tr>
+      <td>${esc(s.tanggal)}</td>
+      <td><b>${esc(v?.plat || '—')}</b></td>
+      <td>${esc(customerName(v?.pelangganId))}</td>
+      <td>${esc(s.jenis)}</td>
+      <td>${statusPill(s.status)}</td>
+      <td>${payPill(s)}</td>
+      <td>${rupiah(total(s))}</td>
+      <td>${rupiah(paid(s))}</td>
+      <td>${rupiah(s.status === 'Dibatalkan' ? 0 : Math.max(0, total(s) - paid(s)))}</td>
+    </tr>`;
+  });
+  document.getElementById('reportTable').innerHTML = table(['Tanggal', 'Plat', 'Pelanggan', 'Jenis', 'Status Servis', 'Pembayaran', 'Tagihan', 'Dibayar', 'Sisa'], rows);
+}
+
+// ==================== 3. MANAJEMEN PENGGUNA (KHUSUS ADMIN) ====================
+function renderPengguna() {
+  if (currentUser.role !== 'admin') return;
+  const q = (document.getElementById('searchPengguna')?.value || '').toLowerCase();
+  const arr = db.users.filter(u => (u.username + ' ' + u.nama + ' ' + u.role).toLowerCase().includes(q));
+  document.getElementById('tablePengguna').innerHTML = table(
+    ['Username', 'Nama Lengkap', 'Peran (Role)', 'Profil Pelanggan', 'Status', 'Aksi'],
+    arr.map(u => {
+      const isSelf = u.id === currentUser.id;
+      return `<tr>
+        <td><b>@${esc(u.username)}</b></td>
+        <td>${esc(u.nama)}</td>
+        <td>${roleBadge(u.role)}</td>
+        <td>${u.pelangganId ? esc(customerName(u.pelangganId)) : '<span class="muted">—</span>'}</td>
+        <td><span class="pill ${u.aktif ? 'done' : 'cancel'}">${u.aktif ? 'Aktif' : 'Nonaktif'}</span></td>
+        <td><div class="row-actions">
+          <button class="btn small secondary" onclick="openUserAccountForm('${u.id}')">Edit / Reset Pass</button>
+          ${!isSelf ? `<button class="btn small danger" onclick="toggleUserActive('${u.id}')">${u.aktif ? 'Nonaktifkan' : 'Aktifkan'}</button>` : '<span class="muted" style="font-size:11px;padding:4px">(Akun Anda)</span>'}
+        </div></td>
+      </tr>`;
+    })
+  );
+}
+
+function openUserAccountForm(uid = null) {
+  if (currentUser.role !== 'admin') return;
+  const item = uid ? db.users.find(u => u.id === uid) : {};
+  const edit = !!uid;
+  modal(edit ? `Edit Akun @${item.username}` : 'Buat Akun Pengguna Baru', `
+    <form id="accountForm">
+      <div class="form-grid">
+        <div class="field">
+          <label>Username</label>
+          <input name="username" value="${esc(item.username || '')}" ${edit ? 'readonly style="background:#f5f0e8"' : 'required'} placeholder="Username login unik">
+        </div>
+        <div class="field">
+          <label>Peran (Role)</label>
+          <select name="role" ${item.id === currentUser.id ? 'disabled' : ''}>
+            <option value="user" ${item.role === 'user' ? 'selected' : ''}>User Biasa (Pelanggan)</option>
+            <option value="operator" ${item.role === 'operator' ? 'selected' : ''}>Operator Bengkel</option>
+            <option value="admin" ${item.role === 'admin' ? 'selected' : ''}>Administrator</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label>Nama Lengkap</label>
+          <input name="nama" value="${esc(item.nama || '')}" required placeholder="Nama lengkap pengguna">
+        </div>
+        <div class="field full">
+          <label>${edit ? 'Password Baru (Kosongkan jika tidak ingin mengubah)' : 'Password'}</label>
+          <input name="password" type="password" ${edit ? '' : 'required'} placeholder="Minimal 6 karakter">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" onclick="closeModal()">Batal</button>
+        <button type="submit" class="btn accent">Simpan Akun</button>
+      </div>
+    </form>`);
+
+  document.getElementById('accountForm').onsubmit = async e => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target));
+    const uname = d.username.trim().toLowerCase();
+    const role = item.id === currentUser.id ? 'admin' : d.role;
+
+    if (!edit && !/^[a-z0-9_.-]{3,20}$/.test(uname)) {
+      toast('Username 3-20 karakter (huruf kecil/angka).');
+      return;
+    }
+    if (!edit && db.users.some(u => u.username.toLowerCase() === uname)) {
+      toast('Username sudah terdaftar.');
+      return;
+    }
+    if (d.password && d.password.length < 6) {
+      toast('Password minimal 6 karakter.');
+      return;
+    }
+
+    if (edit) {
+      item.nama = d.nama.trim();
+      item.role = role;
+      if (role === 'user' && !item.pelangganId) {
+        const pid = 'p_' + id();
+        db.pelanggan.push({ id: pid, nama: item.nama, telepon: '-', alamat: '-' });
+        item.pelangganId = pid;
+      }
+      if (d.password) {
+        item.salt = makeSalt();
+        item.hash = await passwordDigest(d.password, item.salt);
+      }
+    } else {
+      let pid = null;
+      if (role === 'user') {
+        pid = 'p_' + id();
+        db.pelanggan.push({ id: pid, nama: d.nama.trim(), telepon: '-', alamat: '-' });
+      }
+      const salt = makeSalt();
+      const hash = await passwordDigest(d.password, salt);
+      db.users.push({
+        id: 'u_' + id(),
+        username: uname,
+        nama: d.nama.trim(),
+        role,
+        pelangganId: pid,
+        salt,
+        hash,
+        aktif: true,
+        createdAt: today()
+      });
+    }
+    save();
+    closeModal();
+    render();
+    toast('Data akun pengguna berhasil disimpan.');
+  };
+}
+
+function toggleUserActive(uid) {
+  if (currentUser.role !== 'admin' || uid === currentUser.id) return;
+  const u = db.users.find(x => x.id === uid);
+  if (!u) return;
+  u.aktif = !u.aktif;
+  save();
+  renderPengguna();
+  toast(`Akun @${u.username} ${u.aktif ? 'diaktifkan' : 'dinonaktifkan'}.`);
+}
+
+// ==================== MODAL & FORM ENTITAS ====================
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('show');
+}
+function modal(title, html) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalBackdrop').classList.add('show');
+}
+
+function openQuickVehicleForCustomer(pid) {
+  const cust = db.pelanggan.find(p => p.id === pid);
+  if (!cust) return;
+  modal('Tambah Kendaraan · ' + cust.nama, `
+    <form id="quickVehForm">
+      <div class="form-grid">
+        <div class="field"><label>Plat Nomor</label><input name="plat" required placeholder="Contoh: BL 7788 ZZ"></div>
+        <div class="field"><label>Merek</label><input name="merek" required placeholder="Honda / Yamaha / Toyota"></div>
+        <div class="field"><label>Model</label><input name="model" required placeholder="Beat / Avanza"></div>
+        <div class="field"><label>Tahun</label><input name="tahun" type="number" min="1950" max="${new Date().getFullYear() + 1}" value="2022"></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" onclick="closeModal()">Batal</button>
+        <button type="submit" class="btn accent">Simpan Kendaraan</button>
+      </div>
+    </form>`);
+  document.getElementById('quickVehForm').onsubmit = e => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target));
+    d.plat = d.plat.trim().toUpperCase().replace(/\s+/g, ' ');
+    if (db.kendaraan.some(k => k.plat === d.plat)) { toast('Plat nomor sudah terdaftar.'); return; }
+    d.tahun = d.tahun ? Number(d.tahun) : null;
+    db.kendaraan.push({ id: 'k_' + id(), pelangganId: pid, ...d });
+    save();
+    closeModal();
+    render();
+    toast('Kendaraan berhasil ditambahkan untuk ' + cust.nama);
+  };
+}
+
+function openForm(type, itemId = null) {
+  if ((type === 'mekanik' || type === 'kendaraan') && currentUser.role !== 'admin') {
+    toast('Akses ditolak: Hanya Administrator yang dapat mengakses form ini.');
+    return;
+  }
+  const item = itemId ? (db[type].find(x => x.id === itemId) || {}) : {};
+  const edit = !!itemId;
+  let fields = '';
+  const inp = (name, label, value = '', opts = {}) =>
+    `<div class="field ${opts.full ? 'full' : ''}"><label>${label}</label>${
+      opts.select
+        ? `<select name="${name}" ${opts.required ? 'required' : ''}>${opts.select.map(o => `<option value="${esc(o.value)}" ${String(value) === String(o.value) ? 'selected' : ''}>${esc(o.label)}</option>`).join('')}</select>`
+        : opts.textarea
+        ? `<textarea name="${name}" ${opts.required ? 'required' : ''}>${esc(value)}</textarea>`
+        : `<input name="${name}" type="${opts.type || 'text'}" value="${esc(value)}" ${opts.required ? 'required' : ''} ${opts.min !== undefined ? 'min="' + opts.min + '"' : ''} ${opts.max !== undefined ? 'max="' + opts.max + '"' : ''}>`
+    }</div>`;
+
+  if (type === 'pelanggan') {
+    fields = inp('nama', 'Nama Pelanggan', item.nama, { required: true })
+      + inp('telepon', 'Nomor Telepon', item.telepon)
+      + inp('alamat', 'Alamat', item.alamat, { full: true });
+  }
+  if (type === 'kendaraan') {
+    if (!db.pelanggan.length) { toast('Tambahkan data pelanggan terlebih dahulu.'); return; }
+    fields = inp('plat', 'Plat Nomor', item.plat, { required: true })
+      + inp('merek', 'Merek', item.merek, { required: true })
+      + inp('model', 'Model', item.model, { required: true })
+      + inp('tahun', 'Tahun', item.tahun, { type: 'number', min: 1950, max: new Date().getFullYear() + 1 })
+      + inp('pelangganId', 'Pemilik Kendaraan', item.pelangganId, { required: true, full: true, select: db.pelanggan.map(p => ({ value: p.id, label: p.nama })) });
+  }
+  if (type === 'mekanik') {
+    fields = inp('nama', 'Nama Mekanik', item.nama, { required: true })
+      + inp('telepon', 'Nomor Telepon', item.telepon)
+      + inp('keahlian', 'Keahlian', item.keahlian, { full: true })
+      + inp('aktif', 'Status', String(item.aktif !== false), { select: [{ value: 'true', label: 'Aktif' }, { value: 'false', label: 'Nonaktif' }] });
+  }
+  if (type === 'servis') {
+    if (!db.kendaraan.length) { toast('Tambahkan kendaraan terlebih dahulu.'); return; }
+    fields = inp('kendaraanId', 'Kendaraan & Pemilik', item.kendaraanId, { required: true, select: db.kendaraan.map(k => ({ value: k.id, label: `${k.plat} — ${k.merek} ${k.model} (${customerName(k.pelangganId)})` })) })
+      + inp('tanggal', 'Tanggal Servis', item.tanggal || today(), { type: 'date', required: true })
+      + inp('jenis', 'Jenis Servis', item.jenis || 'Servis Umum', { required: true })
+      + inp('mekanikId', 'Mekanik Ditugaskan', item.mekanikId || '', { select: [{ value: '', label: 'Belum ditugaskan' }, ...db.mekanik.filter(m => m.aktif).map(m => ({ value: m.id, label: m.nama }))] })
+      + inp('biayaJasa', 'Biaya Jasa Utama (Rp)', item.biayaJasa ?? 50000, { type: 'number', min: 0, required: true })
+      + inp('keluhan', 'Keluhan Pelanggan', item.keluhan, { textarea: true, full: true, required: true })
+      + inp('diagnosa', 'Diagnosa / Catatan Mekanik', item.diagnosa, { textarea: true, full: true });
+  }
+
+  modal((edit ? 'Edit ' : 'Tambah ') + ({ pelanggan: 'Pelanggan', kendaraan: 'Kendaraan', mekanik: 'Mekanik', servis: 'Antrean Servis' }[type]),
+    `<form id="entityForm"><div class="form-grid">${fields}</div><div class="modal-actions"><button type="button" class="btn secondary" onclick="closeModal()">Batal</button><button class="btn accent" type="submit">Simpan Data</button></div></form>`
+  );
+
+  document.getElementById('entityForm').onsubmit = e => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target).entries());
+    if (type === 'kendaraan') {
+      d.plat = d.plat.trim().toUpperCase().replace(/\s+/g, ' ');
+      if (db.kendaraan.some(k => k.plat === d.plat && k.id !== itemId)) { toast('Plat nomor sudah terdaftar.'); return; }
+      d.tahun = d.tahun ? Number(d.tahun) : null;
+    }
+    if (type === 'mekanik') d.aktif = d.aktif === 'true';
+    if (type === 'servis') {
+      d.biayaJasa = Number(d.biayaJasa);
+      d.status = item.status || 'Menunggu';
+      d.details = item.details || [];
+      d.payments = item.payments || [];
+      if (!d.mekanikId) d.mekanikId = null;
+    }
+    if (type === 'pelanggan' && !d.nama.trim()) { toast('Nama wajib diisi.'); return; }
+    if (edit) Object.assign(item, d);
+    else db[type].push({ id: id(), ...d });
+    save();
+    closeModal();
+    render();
+    toast('Data berhasil disimpan.');
+  };
+}
+
+function removeItem(type, itemId) {
+  if (currentUser.role !== 'admin') {
+    toast('Hanya Administrator yang dapat menghapus data.');
+    return;
+  }
+  const item = db[type].find(x => x.id === itemId);
+  if (!item) return;
+  if (type === 'pelanggan' && db.kendaraan.some(k => k.pelangganId === itemId)) { toast('Tidak bisa hapus: pelanggan masih memiliki kendaraan.'); return; }
+  if (type === 'kendaraan' && db.servis.some(s => s.kendaraanId === itemId)) { toast('Tidak bisa hapus: kendaraan memiliki riwayat servis.'); return; }
+  if (type === 'mekanik' && db.servis.some(s => s.mekanikId === itemId)) {
+    item.aktif = false; save(); render();
+    toast('Mekanik dinonaktifkan karena memiliki riwayat servis.');
+    return;
+  }
+  if (!confirm('Yakin ingin menghapus data ini secara permanen?')) return;
+  db[type] = db[type].filter(x => x.id !== itemId);
+  save();
+  render();
+  toast('Data berhasil dihapus.');
+}
+
+// ==================== KELOLA ANTREAN SERVIS (ADMIN & OPERATOR) ====================
+function openService(sid) {
+  const s = db.servis.find(x => x.id === sid);
+  if (!s) return;
+  const v = vehicle(s.kendaraanId);
+  const next = s.status === 'Menunggu' ? 'Dikerjakan' : s.status === 'Dikerjakan' ? 'Selesai' : null;
+  const isCanceled = s.status === 'Dibatalkan';
+
+  modal('Kelola Antrean Servis · ' + (v?.plat || ''), `
+    <div class="mini-cards">
+      <div class="mini"><span>Pelanggan</span><b style="font-size:14px">${esc(customerName(v?.pelangganId))}</b></div>
+      <div class="mini"><span>Total Biaya</span><b style="font-size:14px">${rupiah(total(s))}</b></div>
+      <div class="mini"><span>Sisa Tagihan</span><b style="font-size:14px">${rupiah(isCanceled ? 0 : Math.max(0, total(s) - paid(s)))}</b></div>
+    </div>
+    <p><b>Keluhan:</b> ${esc(s.keluhan)}</p>
+    <p><b>Diagnosa:</b> ${esc(s.diagnosa || 'Belum ada')}</p>
+    <p><b>Mekanik:</b> ${esc(mechanicName(s.mekanikId))} &nbsp; ${statusPill(s.status)} &nbsp; ${payPill(s)}</p>
+
+    <div class="modal-actions" style="justify-content:flex-start;margin:12px 0 16px">
+      ${!isCanceled && next ? `<button class="btn accent" onclick="advanceStatus('${sid}')">Proses ke ${next} →</button>` : ''}
+      ${!isCanceled ? `<button class="btn secondary" onclick="editServiceFromDetail('${sid}')">Edit Data / Pilih Mekanik</button>` : ''}
+      ${!isCanceled ? `<button class="btn secondary" onclick="addDetail('${sid}')">＋ Jasa / Sparepart</button>` : ''}
+      ${!isCanceled ? `<button class="btn success" onclick="addPayment('${sid}')">＋ Input Pembayaran</button>` : ''}
+      <button class="btn secondary" onclick="openUserServiceDetail('${sid}')">🖨 Lihat Nota</button>
+    </div>
+
+    <h3 style="font-size:14px">Rincian Pekerjaan & Sparepart</h3>
+    <div class="table-wrap">${table(
+      ['Tipe', 'Deskripsi', 'Qty', 'Harga', 'Subtotal', ''],
+      (s.details || []).map(d => `<tr>
+        <td>${esc(d.tipe)}</td>
+        <td>${esc(d.deskripsi)}</td>
+        <td>${d.jumlah}</td>
+        <td>${rupiah(d.harga)}</td>
+        <td>${rupiah(d.jumlah * d.harga)}</td>
+        <td>${!isCanceled ? `<button class="link" onclick="removeDetail('${sid}','${d.id}')">Hapus</button>` : ''}</td>
+      </tr>`),
+      'Belum ada tambahan jasa atau sparepart.'
+    )}</div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0 4px"><span>Biaya jasa utama</span><b>${rupiah(s.biayaJasa)}</b></div>
+    <div style="display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:8px"><b>Total Tagihan Servis</b><b>${rupiah(total(s))}</b></div>
+
+    <h3 style="font-size:14px;margin-top:20px">Riwayat Pembayaran</h3>
+    <div class="table-wrap">${table(
+      ['Tanggal', 'Metode', 'Jumlah'],
+      (s.payments || []).map(p => `<tr><td>${esc(p.tanggal)}</td><td>${esc(p.metode)}</td><td>${rupiah(p.jumlah)}</td></tr>`),
+      'Belum ada pembayaran tercatat.'
+    )}</div>
+    <div style="display:flex;justify-content:space-between;padding:10px 0"><b>Total Dibayar</b><b>${rupiah(paid(s))}</b></div>
+  `);
+}
+
+function advanceStatus(sid) {
+  const s = db.servis.find(x => x.id === sid);
+  if (s.status === 'Menunggu') s.status = 'Dikerjakan';
+  else if (s.status === 'Dikerjakan') s.status = 'Selesai';
+  save();
+  openService(sid);
+  render();
+  toast('Status antrean diperbarui ke: ' + s.status);
+}
+function editServiceFromDetail(sid) {
+  closeModal();
+  openForm('servis', sid);
+}
+function addDetail(sid) {
+  const s = db.servis.find(x => x.id === sid);
+  modal('Tambah Rincian Jasa / Sparepart', `
+    <form id="detailForm">
+      <div class="form-grid">
+        <div class="field"><label>Tipe Rincian</label><select name="tipe"><option>Sparepart</option><option>Jasa</option></select></div>
+        <div class="field"><label>Deskripsi</label><input name="deskripsi" required placeholder="Contoh: Oli Mesin 1L"></div>
+        <div class="field"><label>Jumlah</label><input name="jumlah" type="number" min="1" value="1" required></div>
+        <div class="field"><label>Harga Satuan (Rp)</label><input name="harga" type="number" min="0" value="50000" required></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" onclick="openService('${sid}')">Batal</button>
+        <button class="btn accent">Tambahkan</button>
+      </div>
+    </form>`);
+  document.getElementById('detailForm').onsubmit = e => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target));
+    d.jumlah = Number(d.jumlah);
+    d.harga = Number(d.harga);
+    s.details.push({ id: id(), ...d });
+    save();
+    openService(sid);
+    render();
+    toast('Rincian ditambahkan.');
+  };
+}
+function removeDetail(sid, did) {
+  const s = db.servis.find(x => x.id === sid);
+  s.details = s.details.filter(d => d.id !== did);
+  save();
+  openService(sid);
+  render();
+  toast('Rincian dihapus.');
+}
+function addPayment(sid) {
+  const s = db.servis.find(x => x.id === sid);
+  const remain = Math.max(0, total(s) - paid(s));
+  if (remain <= 0) { toast('Tagihan sudah lunas.'); return; }
+  modal('Catat Pembayaran Pelanggan', `
+    <p class="muted">Sisa tagihan: <b>${rupiah(remain)}</b></p>
+    <form id="paymentForm">
+      <div class="form-grid">
+        <div class="field"><label>Tanggal Pembayaran</label><input type="date" name="tanggal" value="${today()}" required></div>
+        <div class="field"><label>Jumlah (Rp)</label><input type="number" name="jumlah" min="1" max="${remain}" value="${remain}" required></div>
+        <div class="field full"><label>Metode Pembayaran</label><select name="metode"><option>Tunai</option><option>Transfer Bank</option><option>QRIS</option><option>Debit / Kartu</option></select></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn secondary" onclick="openService('${sid}')">Batal</button>
+        <button class="btn success">Simpan Pembayaran</button>
+      </div>
+    </form>`);
+  document.getElementById('paymentForm').onsubmit = e => {
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target));
+    d.jumlah = Number(d.jumlah);
+    const left = total(s) - paid(s);
+    if (d.jumlah <= 0 || d.jumlah > left) { toast('Jumlah melebihi sisa tagihan.'); return; }
+    s.payments.push({ id: id(), ...d });
+    save();
+    openService(sid);
+    render();
+    toast('Pembayaran berhasil dicatat.');
+  };
+}
+function vehicleHistory(kid) {
+  const k = vehicle(kid);
+  const arr = db.servis.filter(s => s.kendaraanId === kid);
+  modal('Riwayat Servis · ' + k.plat, `
+    <p>${esc(k.merek)} ${esc(k.model)} · Pemilik: <b>${esc(customerName(k.pelangganId))}</b></p>
+    ${table(['Tanggal', 'Keluhan', 'Diagnosa', 'Status', 'Total'], arr.map(s =>
+      `<tr><td>${esc(s.tanggal)}</td><td>${esc(s.keluhan)}</td><td>${esc(s.diagnosa || '—')}</td><td>${statusPill(s.status)}</td><td>${rupiah(total(s))}</td></tr>`
+    ))}
+  `);
+}
+
+function exportCSV() {
+  if (currentUser?.role !== 'admin') return;
+  const rows = [['Tanggal', 'Plat', 'Pelanggan', 'Jenis Servis', 'Status Servis', 'Status Pembayaran', 'Total', 'Dibayar', 'Sisa']];
+  db.servis.forEach(s => {
+    const v = vehicle(s.kendaraanId);
+    rows.push([s.tanggal, v?.plat || '', customerName(v?.pelangganId), s.jenis, s.status, payStatus(s), total(s), paid(s), s.status === 'Dibatalkan' ? 0 : Math.max(0, total(s) - paid(s))]);
+  });
+  const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `laporan-autora-${today()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Laporan CSV berhasil diekspor.');
+}
+
+document.getElementById('exportBtn').onclick = exportCSV;
+document.getElementById('resetBtn').onclick = async () => {
+  if (currentUser?.role !== 'admin') return;
+  if (confirm('Reset semua data aplikasi dan akun ke kondisi awal demo?')) {
+    db = await buildSeedData();
+    save();
+    const adminUser = db.users.find(u => u.id === currentUser.id) || db.users.find(u => u.role === 'admin');
+    applySession(adminUser);
+    toast('Data sistem berhasil direset ke awal.');
+  }
+};
+
+['Pelanggan', 'Kendaraan', 'Mekanik', 'Servis', 'Pengguna'].forEach(n => {
+  const el = document.getElementById('search' + n);
+  if (el) el.addEventListener('input', () => ({
+    Pelanggan: renderPelanggan,
+    Kendaraan: renderKendaraan,
+    Mekanik: renderMekanik,
+    Servis: renderServis,
+    Pengguna: renderPengguna
+  })[n]());
+});
+document.getElementById('modalBackdrop').addEventListener('click', e => {
+  if (e.target.id === 'modalBackdrop') closeModal();
+});
+
+// Inisialisasi Aplikasi
+(async function bootstrap() {
+  try {
+    const raw = localStorage.getItem(DB_KEY);
+    db = raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    db = null;
+  }
+  if (!db || !Array.isArray(db.users) || !db.users.length) {
+    db = await buildSeedData();
+    save();
+  }
+  try {
+    const sess = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+    if (sess && sess.id) {
+      const found = db.users.find(u => u.id === sess.id && u.aktif);
+      if (found) {
+        applySession(found);
+        return;
+      }
+    }
+  } catch (e) {}
+  switchAuthTab('login');
+})();
+</script>
+</body>
+</html>

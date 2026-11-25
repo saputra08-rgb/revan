@@ -370,6 +370,9 @@ export function openServiceReceiptModal(sid) {
   const db = getDb();
   const s = db.servis.find((x) => x.id === sid);
   if (!s) return;
+  const settings = db.settings || {};
+  const workshopName = settings.namaBengkel || 'BENGKEL AUTORA';
+  const workshopContact = [settings.alamatBengkel, settings.teleponBengkel].filter(Boolean).join(' · ');
   const v = findVehicle(s.kendaraanId);
   const step1 = s.status !== 'Dibatalkan' ? 'done' : '';
   const step2 = s.status === 'Dikerjakan' ? 'active' : s.status === 'Selesai' ? 'done' : '';
@@ -392,7 +395,8 @@ export function openServiceReceiptModal(sid) {
     <div class="receipt-box">
       <div class="receipt-head">
         <div>
-          <strong style="font-size:16px;">BENGKEL AUTORA</strong>
+          <strong style="font-size:16px;">${esc(workshopName)}</strong>
+          ${workshopContact ? `<div class="muted" style="font-size:12px;">${esc(workshopContact)}</div>` : ''}
           <div class="muted mono" style="font-size:12px;">No. Nota #${esc(s.id.toUpperCase())} · ${esc(s.tanggal)}</div>
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;">
@@ -450,6 +454,7 @@ export function openServiceReceiptModal(sid) {
         <div class="receipt-total-row"><span>Sudah Dibayar</span><strong style="color:var(--success);">${rupiah(servicePaid(s))}</strong></div>
         <div class="receipt-total-row"><span>Sisa Tagihan</span><strong style="color:${sisa > 0 ? 'var(--danger)' : 'var(--muted)'};">${rupiah(sisa)}</strong></div>
       </div>
+      ${settings.catatanNota ? `<div class="receipt-footer">${esc(settings.catatanNota)}</div>` : ''}
     </div>
 
     <div class="modal-actions">

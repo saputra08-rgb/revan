@@ -570,6 +570,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+.receipt-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-strong);
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
 /* Modals & Bottom-Sheets */
 .modal-backdrop {
   position: fixed;
@@ -705,6 +714,21 @@
   transform: translateY(0);
 }
 
+.offline-banner {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  border: 1px solid var(--warn-border);
+  padding: 9px 14px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 65;
+}
+
 @media (max-width: 959px) {
   .auth-layout {
     grid-template-columns: 1fr;
@@ -785,6 +809,13 @@
     left: 14px;
     right: 14px;
     bottom: calc(70px + var(--safe-bottom));
+    text-align: center;
+  }
+
+  .offline-banner {
+    left: 14px;
+    right: 14px;
+    bottom: calc(68px + var(--safe-bottom));
     text-align: center;
   }
 }

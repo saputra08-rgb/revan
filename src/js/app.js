@@ -1,4 +1,5 @@
 import { ICONS } from './icons.js';
+import { initPwa } from './pwa.js';
 import { canAccessView, isAdmin, ROLE_CONFIG, VIEW_TITLES } from './rbac.js';
 import {
   buildSeedData,
@@ -35,6 +36,7 @@ import {
   renderUserBills,
   renderUserPortal,
 } from './views/portal.js';
+import { openMyProfileModal, openWorkshopSettingsModal } from './views/profile.js';
 import { openServiceWorkbench, renderServis } from './views/servis.js';
 
 let activeView = null;
@@ -162,7 +164,8 @@ function applySession(user) {
       .join('');
   }
 
-  showView(cfg.defaultView);
+  const target = activeView && canAccessView(user, activeView) ? activeView : cfg.defaultView;
+  showView(target);
 }
 
 function handleLogout() {
@@ -219,6 +222,18 @@ function bindWorkspaceEvents() {
   document.getElementById('mobileLogoutBtn')?.addEventListener('click', handleLogout);
   document.getElementById('resetBtn')?.addEventListener('click', handleResetDemo);
   document.getElementById('mobileResetBtn')?.addEventListener('click', handleResetDemo);
+
+  const openProfile = () => {
+    openMyProfileModal((updatedUser) => {
+      if (updatedUser) applySession(updatedUser);
+    });
+  };
+  document.getElementById('profileBtn')?.addEventListener('click', openProfile);
+  document.getElementById('mobileProfileBtn')?.addEventListener('click', openProfile);
+
+  document.getElementById('workshopSettingsBtn')?.addEventListener('click', () => {
+    openWorkshopSettingsModal(renderActiveViews);
+  });
 
   document.getElementById('btnUserAddVehicle')?.addEventListener('click', () => {
     openUserVehicleForm(null, renderActiveViews);
@@ -319,6 +334,7 @@ function bindWorkspaceEvents() {
 export function bootstrapApp() {
   initStore();
   initModalListeners();
+  initPwa();
   initAuth(applySession);
   bindWorkspaceEvents();
 
